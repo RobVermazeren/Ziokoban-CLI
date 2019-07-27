@@ -1,0 +1,24 @@
+### IntelliJ
+.idea/
+
+*.sc
+
+#### scala ####
+*.class
+*.log
+
+## sbt
+.cache
+.history
+.lib/
+dist/*
+target/
+project/target/
+lib_managed/
+src_managed/
+
+### bloop
+.bloop/
+
+### metals
+.metals/
