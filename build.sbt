@@ -27,7 +27,7 @@ scalacOptions ++= Seq(
 javacOptions ++= Seq("-Xlint:unchecked", "-Xlint:deprecation", "-source", "1.8", "-target", "1.8")
 
 val CatsVersion = "1.6.1"
-val ZIOVersion  = "1.0.0-RC9"
+val ZIOVersion  = "1.0.0-RC10-1"
 
 libraryDependencies ++= Seq(
   // ZIO
