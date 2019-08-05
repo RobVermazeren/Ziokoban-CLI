@@ -1,6 +1,7 @@
 package nl.itvanced.ziokoban
 
 import nl.itvanced.ziokoban.Model._
+import nl.itvanced.ziokoban.Model.Direction._
 
 // Utility case class for holding information of a Location (in a LevelMap).
 case class LocationInfo(isValid: Boolean, holdsCrate: Boolean)
@@ -85,11 +86,21 @@ object GameState {
         }
     }
   }
+
   def undo(gs: GameState): GameState = gs.history match {
     case h :: tail => 
       gs.copy(pusherLocation = h.pusherLocation, crateLocations = h.crateLocations, history = tail)
     case Nil => 
       gs // No history to go back to
+  }
+
+  def allSteps(gs: GameState): String = gs.history.map(_.appliedDirection).map(direction2char).mkString.reverse
+
+  private def direction2char(d: Direction) = d match {
+    case Down =>  'd'
+    case Left =>  'l'
+    case Right => 'r'
+    case Up =>    'u'
   }
   // Return the Coord that results from moving from c into direction d.
   private def applyDirection(c: Coord, d: Direction): Coord = d match {

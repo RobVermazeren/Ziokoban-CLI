@@ -60,7 +60,7 @@ object ZiokobanApp extends App {
       gs <- gameLoop(gameState)
       _  <- postDrawing(gs)
       _  <- gs.isSolved match {
-        case Some(true) => println("Congratulations, you won!")
+        case Some(true) => println(s"Congratulations, you won! \n\nYour steps were ${GameState.allSteps(gs)}\n")
         case _ => println("Better luck next time")
       }
       _  <- println("Thank you for playing ZIOKOBAN")
