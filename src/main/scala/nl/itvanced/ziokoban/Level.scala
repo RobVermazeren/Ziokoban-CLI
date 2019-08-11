@@ -3,21 +3,62 @@ package nl.itvanced.ziokoban
 import nl.itvanced.ziokoban.Level.LevelMap
 import nl.itvanced.ziokoban.Model._
 
-case class Level private (map: Level.LevelMap, spaces: Set[Coord], walls: Set[Coord], pusherLocation: Coord, crateLocations: Set[Coord], targetLocations: Set[Coord]) {
-  val height: Int = map.keySet.map(_.y).max + 1
-  val width: Int = map.keySet.map(_.x).max + 1
+/** Trait representing a Sokoban level. */ 
+trait Level {
+  /** the source LevelMap */
+  def map: Level.LevelMap
+
+  /** calculated height of this map */
+  lazy val height: Int = map.keySet.map(_.y).max + 1
+
+  /** calculated width of this map */
+  lazy val width: Int = map.keySet.map(_.x).max + 1
+
+  /** set of all valid spaces on this map */
+  def spaces: Set[Coord]
+
+  /** the starting location of the pusher */
+  def pusher: Coord
+
+  /** set of all walls on this map */
+  def walls: Set[Coord]
+
+  /** @param c location. 
+   *  @return 'true' if location c on this map contains a wall.
+   */
+  def isWall(c: Coord): Boolean = walls.contains(c) 
+
+  /** set of the initial locations of all crates on this map */
+  def crates: Set[Coord]
+
+  /** @param c location. 
+   *  @return 'true' if location c on this map contains a crate.
+   */
+  def hasCrate(c: Coord): Boolean = crates.contains(c)
+
+  /** set of all targets on this map */
+  def targets: Set[Coord]
+
+  /** @param c location. 
+   *  @return 'true' if location c on this map is a target.
+   */
+  def isTarget(c: Coord): Boolean = targets.contains(c)
 }
 
 object Level {
+  /** Type alias for a map that represents a Level. */
   type LevelMap = Map[Coord, Tile]
 
-  // Create a level for this map. Return None, if map does not define a valid level.
-  def apply(map: LevelMap): Option[Level] = { 
-    val spaces = map.filter {
+  /** Create a level for this map.
+   *  @param levelMap map of level to be created.
+   *  @return Some containing Level if levelMap represents a valid level, None otherwise.
+   */
+  def fromLevelMap(levelMap: LevelMap): Option[Level] = { 
+    val spaces = levelMap.filter {
       case (_, Space(_, _)) => true
       case _ => false
     }
-    val walls = map.filter {
+    val wallLocations = levelMap.filter {
       case (_, Wall) => true
       case _ => false
     }.keySet
@@ -26,13 +67,24 @@ object Level {
       crateLocations = getCrateLocations(spaces)
       targetLocations = getTargetLocations(spaces)
       if (crateLocations.size == targetLocations.size)
-      reachableSpaces = LevelMap.reachableSpaces(map, pusherLocation)
+      reachableSpaces = LevelMap.reachableSpaces(levelMap, pusherLocation)
       if (crateLocations subsetOf reachableSpaces)
       if (targetLocations subsetOf reachableSpaces)
-    } yield new Level(map, reachableSpaces, walls, pusherLocation, crateLocations, targetLocations)
+    } yield new Level {
+        val map: LevelMap = levelMap 
+        val spaces: Set[Coord] = reachableSpaces 
+        val walls: Set[Coord] = wallLocations
+        val pusher: Coord = pusherLocation
+        val crates: Set[Coord] = crateLocations
+        val targets: Set[Coord] = targetLocations
+      }
   }
 
-  // Return the pusher location from map. Return None if no or more than one pusher have been defined.
+  /** Return the pusher location. 
+   *  Only valid if map contains exactly one pusher.
+   *  @param map the source LevelMap.
+   *  @return Some of the pusher location, None otherwise.
+   */ 
   private def getPusherLocation(map: LevelMap): Option[Coord] = {
     map.filter {
       case (_, tile) => isSpaceWithOccupant(tile, Pusher)
@@ -42,14 +94,20 @@ object Level {
     }
   }
 
-  // Return all crate locations from map.
+  /** Return all crate locations.
+   *  @param map the source LevelMap.
+   *  @return A Set of all crate locations.
+   */
   private def getCrateLocations(map: LevelMap): Set[Coord] = {
     map.filter {
       case (_, tile) => isSpaceWithOccupant(tile, Crate)
     }.keySet
   }
 
-  // Return all target locations from map.
+  /** Return all target locations.
+   *  @param map the source LevelMap.
+   *  @return A Set of all target locations.
+   */
   private def getTargetLocations(map: LevelMap): Set[Coord] = {
     map.filter {
       case (_, Space(_, true)) => true
@@ -80,6 +138,7 @@ object Level {
 
       go(Set.empty, List(s))
     }
+
     // Normalize m, by pushing it as much as possible towards the origin.
     def normalize(m: LevelMap): LevelMap = {
       val coords = m.keySet

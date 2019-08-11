@@ -20,7 +20,7 @@ trait ResourceLevelsSource extends LevelsSource {
   }
 
   private def toLevel(lines: List[String]): Option[Level] =
-    AsciiLevelFormat.toLevelMap(lines).flatMap(Level(_))
+    AsciiLevelFormat.toLevelMap(lines).flatMap(Level.fromLevelMap(_))
 }
 
 object ResourceLevelsSource {

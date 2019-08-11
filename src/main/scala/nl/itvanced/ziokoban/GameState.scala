@@ -3,93 +3,126 @@ package nl.itvanced.ziokoban
 import nl.itvanced.ziokoban.Model._
 import nl.itvanced.ziokoban.Model.Direction._
 
-// Utility case class for holding information of a Location (in a LevelMap).
-case class LocationInfo(isValid: Boolean, holdsCrate: Boolean)
-
 case class GameStep(pusherLocation: Coord, crateLocations: Set[Coord], appliedDirection: Direction)
 
-case class GameState private (
-    level: Level,
-    pusherLocation: Coord,
-    crateLocations: Set[Coord],
-    isSolved: Option[Boolean] = None,
-    history: List[GameStep] = Nil
-) {
-  private def isValidLocation(location: Coord): Boolean =
-    level.spaces.contains(location)
+/** Trait representing the state of a Sokoban game */ 
+trait GameState {
+  /** the level being played */
+  def level: Level
 
-  private def hasCrateAt(location: Coord): Boolean =
-    crateLocations.contains(location)
+  /** the location of the pusher */
+  def pusher: Coord 
 
-  def locationInfo(location: Coord): LocationInfo =
-    LocationInfo(isValidLocation(location), hasCrateAt(location))
+  /** the locations of the crates */
+  def crates: Set[Coord]
 
-  lazy val spacesMap: GameState.SpacesMap = {
+  /** is this level solved?
+   *  @return None, if game has not ended.
+   *          Some(false), if game ended without the level being solved.
+   *          Some(true), if game ended and the level was solved.
+   */
+  def isSolved: Option[Boolean]
+
+  /** history of the game up untill now */
+  def history: List[GameStep]
+
+  lazy val spacesMap: GameState.SpacesMap = { // TODO RV: does no longer work as a lazy val.
     level.spaces.map { c =>
-      val isTarget = level.targetLocations contains c
+      val isTarget = level.targets contains c
       val space =
-        if (pusherLocation == c) Space(Pusher, isTarget)
-        else if (crateLocations contains c) Space(Crate, isTarget)
+        if (pusher == c) Space(Pusher, isTarget)
+        else if (crates contains c) Space(Crate, isTarget)
         else Space(Empty, isTarget)
 
       c -> space
     }.toMap
   }
 
-  def stopped: GameState = this.copy(isSolved = Some(false))
   def isFinished: Boolean = isSolved.isDefined
-  def changePusherLocation(newPusherLocation: Coord, d: Direction) = {
-    this.copy(pusherLocation = newPusherLocation, history = latestGameStep(d) :: history)
-  }
-  def changePusherAndCrateLocation(newPusherLocation: Coord, newCrateLocation: Coord, d: Direction) = {
-    val newCrateLocations = crateLocations - newPusherLocation + newCrateLocation
-    val newIsSolved = if (newCrateLocations == level.targetLocations) Some(true) else None
-    this.copy(
-      pusherLocation = newPusherLocation,
-      crateLocations = newCrateLocations,
-      isSolved = newIsSolved,
-      history = latestGameStep(d) :: history
-    )
-  }
-  private def latestGameStep(d: Direction) = GameStep(pusherLocation, crateLocations, d)
 }
 
 object GameState {
 
   type SpacesMap = Map[Coord, Space]
 
-  def apply(level: Level): GameState =
-    GameState(level, level.pusherLocation, level.crateLocations)
+  def newForLevel(sourceLevel: Level) = new GameState {
+     val level = sourceLevel
+     val pusher = level.pusher
+     val crates = level.crates
+     val isSolved = None
+     val history = Nil
+  }
+
+  def stopGame(gs: GameState) = new GameState {
+    val level = gs.level
+    val pusher = gs.pusher
+    val crates = gs.crates
+    val isSolved = Some(false) // Ends this game
+    val history = gs.history
+  } 
+
+  def changePusherLocation(gs: GameState, newPusherLocation: Coord, d: Direction) = new GameState {
+    val level = gs.level
+    val pusher = newPusherLocation
+    val crates = gs.crates
+    val isSolved = None
+    val history = GameStep(gs.pusher, gs.crates, d) :: gs.history
+  }
+   
+  def changePusherAndCrateLocation(gs: GameState, newPusherLocation: Coord, newCrateLocation: Coord, d: Direction): GameState  = {
+    val newCrateLocations = gs.crates - newPusherLocation + newCrateLocation
+    val newIsSolved = if (newCrateLocations == gs.level.targets) Some(true) else None
+
+   new GameState {
+    val level = gs.level
+    val pusher = newPusherLocation
+    val crates = newCrateLocations
+    val isSolved = newIsSolved
+    val history = GameStep(gs.pusher, gs.crates, d) :: gs.history
+   }
+  }
+
   // Starting from gs, return the GameState that is the result of moving the pusher in direction d.
   def move(gs: GameState, d: Direction): GameState = {
-    val newLocation = applyDirection(gs.pusherLocation, d)
-    gs.locationInfo(newLocation) match {
-      case LocationInfo(false, _) =>
-        // Move not possible: new location is outside given gs locations.
-        gs
-      case LocationInfo(true, false) =>
+    def isValidLocation(c: Coord): Boolean = gs.level.spaces.contains(c)
+    def hasCrate(c: Coord): Boolean = gs.crates.contains(c)
+
+    val newPusherLocation = applyDirection(gs.pusher, d)
+    if (isValidLocation(newPusherLocation)) {
+      if (!hasCrate(newPusherLocation)) 
         // Move in given direction goes to empty location.
-        gs.changePusherLocation(newLocation, d)
-      case LocationInfo(true, true) =>
+        changePusherLocation(gs, newPusherLocation, d)
+      else {
         // Move in given direction will hit a crate. Check if crate can be moved.
-        val newCrateLocation = applyDirection(newLocation, d)
-        gs.locationInfo(newCrateLocation) match {
-          case LocationInfo(false, _) =>
-            // Move not possible: crate would go outside given gs locations.
-            gs
-          case LocationInfo(true, true) =>
+        val newCrateLocation = applyDirection(newPusherLocation, d)
+        if (isValidLocation(newCrateLocation)) {
+          if (hasCrate(newCrateLocation)) 
             // Move not possible: another crate is blocking this move.
             gs
-          case LocationInfo(true, false) =>
+          else 
             // Crate can be moved
-            gs.changePusherAndCrateLocation(newLocation, newCrateLocation, d)
+            changePusherAndCrateLocation(gs, newPusherLocation, newCrateLocation, d) 
         }
+        else 
+          // Move not possible: crate would go outside given gs locations.
+          gs
+
+      }
     }
+    else 
+      // Move not possible: new location is outside given gs locations.
+      gs
   }
 
   def undo(gs: GameState): GameState = gs.history match {
     case h :: tail => 
-      gs.copy(pusherLocation = h.pusherLocation, crateLocations = h.crateLocations, history = tail)
+      new GameState {
+        val level = gs.level
+        val pusher = h.pusherLocation
+        val crates = h.crateLocations
+        val isSolved = None
+        val history = tail 
+      }
     case Nil => 
       gs // No history to go back to
   }

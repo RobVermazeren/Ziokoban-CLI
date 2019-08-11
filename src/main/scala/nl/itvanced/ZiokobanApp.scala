@@ -53,7 +53,7 @@ object ZiokobanApp extends App {
   }
 
   private def playLevel(level: Level): ZIO[GameOutput with GameInput, Throwable, Boolean]  = { 
-    val gameState = GameState(level)
+    val gameState = GameState.newForLevel(level)
     for {
       _  <- preDrawing(gameState)
       _  <- drawGameState(gameState)
@@ -86,7 +86,7 @@ object ZiokobanApp extends App {
               _ <- drawGameState(newGameState)
             } yield newGameState
           }
-          case Quit => ZIO.effectTotal[GameState](gs.stopped)
+          case Quit => ZIO.effectTotal[GameState](GameState.stopGame(gs))
           case Noop =>
             ZIO.effectTotal[GameState](gs) // RVNOTE: wait for a moment?
         }
