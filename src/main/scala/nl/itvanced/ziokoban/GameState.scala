@@ -32,7 +32,7 @@ trait GameState {
 
 object GameState {
 
-  def newForLevel(sourceLevel: Level) = new GameState {
+  def startLevel(sourceLevel: Level) = new GameState {
      val level = sourceLevel
      val pusher = level.pusher
      val crates = level.crates
@@ -71,7 +71,7 @@ object GameState {
 
   // Starting from gs, return the GameState that is the result of moving the pusher in direction d.
   def move(gs: GameState, d: Direction): GameState = {
-    def isValidLocation(c: Coord): Boolean = gs.level.spaces.contains(c)
+    def isValidLocation(c: Coord): Boolean = gs.level.fields.contains(c)
     def hasCrate(c: Coord): Boolean = gs.crates.contains(c)
 
     val newPusherLocation = applyDirection(gs.pusher, d)
@@ -125,10 +125,10 @@ object GameState {
 
   /** Translate a Direction to a Char */
   private def direction2char(d: Direction) = d match {
-    case Down =>  'd'
-    case Left =>  'l'
+    case Down  => 'd'
+    case Left  => 'l'
     case Right => 'r'
-    case Up =>    'u'
+    case Up    => 'u'
   }
 
   /** Return the Coord that results from moving from c into direction d.

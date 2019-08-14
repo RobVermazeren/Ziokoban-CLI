@@ -17,10 +17,10 @@ object Model {
   sealed trait Tile
   case object Wall extends Tile
   case object Void extends Tile // outside of walls
-  case class Space(occupant: Occupant, isTarget: Boolean) extends Tile
+  case class Field(occupant: Occupant, isTarget: Boolean) extends Tile
 
-  def isSpaceWithOccupant(tile: Tile, occupant: Occupant): Boolean = tile match {
-    case Space(o, _) if o == occupant => true
+  def isFieldWithOccupant(tile: Tile, occupant: Occupant): Boolean = tile match {
+    case Field(o, _) if o == occupant => true
     case _                            => false
   }
 

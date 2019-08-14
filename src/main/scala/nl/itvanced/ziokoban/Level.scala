@@ -14,8 +14,8 @@ trait Level {
   /** calculated width of this map */
   lazy val width: Int = map.keySet.map(_.x).max + 1
 
-  /** valid spaces on this map */
-  def spaces: Set[Coord]
+  /** valid fields on this map */
+  def fields: Set[Coord]
 
   /** the starting location of the pusher */
   def pusher: Coord
@@ -54,8 +54,8 @@ object Level {
    *  @return Some containing Level if levelMap represents a valid level, None otherwise.
    */
   def fromLevelMap(levelMap: LevelMap): Option[Level] = { 
-    val spaces = levelMap.filter {
-      case (_, Space(_, _)) => true
+    val fields = levelMap.filter {
+      case (_, Field(_, _)) => true
       case _ => false
     }
     val wallLocations = levelMap.filter {
@@ -63,16 +63,16 @@ object Level {
       case _ => false
     }.keySet
     for {
-      pusherLocation <- getPusherLocation(spaces)
-      crateLocations = getCrateLocations(spaces)
-      targetLocations = getTargetLocations(spaces)
+      pusherLocation <- getPusherLocation(fields)
+      crateLocations = getCrateLocations(fields)
+      targetLocations = getTargetLocations(fields)
       if (crateLocations.size == targetLocations.size)
-      reachableSpaces = LevelMap.reachableSpaces(levelMap, pusherLocation)
-      if (crateLocations subsetOf reachableSpaces)
-      if (targetLocations subsetOf reachableSpaces)
+      reachableFields = LevelMap.reachableFields(levelMap, pusherLocation)
+      if (crateLocations subsetOf reachableFields)
+      if (targetLocations subsetOf reachableFields)
     } yield new Level {
         val map: LevelMap = levelMap 
-        val spaces: Set[Coord] = reachableSpaces 
+        val fields: Set[Coord] = reachableFields 
         val walls: Set[Coord] = wallLocations
         val pusher: Coord = pusherLocation
         val crates: Set[Coord] = crateLocations
@@ -87,7 +87,7 @@ object Level {
    */ 
   private def getPusherLocation(map: LevelMap): Option[Coord] = {
     map.filter {
-      case (_, tile) => isSpaceWithOccupant(tile, Pusher)
+      case (_, tile) => isFieldWithOccupant(tile, Pusher)
     }.keySet.toList match { // There must be exactly one pusher on a level.
       case h :: Nil => Some(h)
       case _        => None
@@ -100,7 +100,7 @@ object Level {
    */
   private def getCrateLocations(map: LevelMap): Set[Coord] = {
     map.filter {
-      case (_, tile) => isSpaceWithOccupant(tile, Crate)
+      case (_, tile) => isFieldWithOccupant(tile, Crate)
     }.keySet
   }
 
@@ -110,20 +110,20 @@ object Level {
    */
   private def getTargetLocations(map: LevelMap): Set[Coord] = {
     map.filter {
-      case (_, Space(_, true)) => true
+      case (_, Field(_, true)) => true
       case _                   => false
     }.keySet
   }
 
   object LevelMap {
-    // Return all spaces from m, that are reachable from s.
-    def reachableSpaces(m: LevelMap, s: Coord): Set[Coord] = {
-      // Return all neighboring spaces for c in map.
-      def neighboringSpaces(c: Coord, map: LevelMap): Set[Coord] = {
+    // Return all fields from m, that are reachable from s.
+    def reachableFields(m: LevelMap, s: Coord): Set[Coord] = {
+      // Return all neighboring fields for c in map.
+      def neighboringFields(c: Coord, map: LevelMap): Set[Coord] = {
         val options = Set(Coord(c.x + 1, c.y), Coord(c.x - 1, c.y), Coord(c.x, c.y + 1), Coord(c.x, c.y - 1))
         options.filter(c =>
           m.get(c) match {
-            case Some(Space(_, _)) => true
+            case Some(Field(_, _)) => true
             case _ => false
           })
       }
@@ -131,8 +131,8 @@ object Level {
       def go(done: Set[Coord], todo: List[Coord]): Set[Coord] = todo match {
         case Nil => done
         case h :: cs =>
-          // Add the neighboring spaces that have not already been processed.
-          val newTodos = neighboringSpaces(h, m) diff done
+          // Add the neighboring fields that have not already been processed.
+          val newTodos = neighboringFields(h, m) diff done
           go(done + h, cs ++ newTodos)
       }
 
@@ -169,12 +169,12 @@ object AsciiLevelFormat {
   // Convert char (from level file) to a Tile.
   private def charToTile(c: Char): Option[Tile] = c match {
     case '#'           => Some(Wall)
-    case '@'           => Some(Space(Pusher, false))
-    case '+'           => Some(Space(Pusher, true))
-    case '$'           => Some(Space(Crate, false))
-    case '*'           => Some(Space(Crate, true))
-    case '.'           => Some(Space(Empty, true))
-    case ' '| '-'| '_' => Some(Space(Empty, false))
+    case '@'           => Some(Field(Pusher, false))
+    case '+'           => Some(Field(Pusher, true))
+    case '$'           => Some(Field(Crate, false))
+    case '*'           => Some(Field(Crate, true))
+    case '.'           => Some(Field(Empty, true))
+    case ' '| '-'| '_' => Some(Field(Empty, false))
     case _             => None // Illegal character detected.
   }
 }

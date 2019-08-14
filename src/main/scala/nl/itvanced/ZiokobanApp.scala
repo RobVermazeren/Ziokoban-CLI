@@ -53,7 +53,7 @@ object ZiokobanApp extends App {
   }
 
   private def playLevel(level: Level): ZIO[GameOutput with GameInput, Throwable, Boolean]  = { 
-    val gameState = GameState.newForLevel(level)
+    val gameState = GameState.startLevel(level)
     for {
       _  <- preDrawing(gameState)
       _  <- drawGameState(gameState)
