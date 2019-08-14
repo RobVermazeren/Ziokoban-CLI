@@ -26,24 +26,11 @@ trait GameState {
   /** history of the game up untill now */
   def history: List[GameStep]
 
-  lazy val spacesMap: GameState.SpacesMap = { // TODO RV: does no longer work as a lazy val.
-    level.spaces.map { c =>
-      val isTarget = level.targets contains c
-      val space =
-        if (pusher == c) Space(Pusher, isTarget)
-        else if (crates contains c) Space(Crate, isTarget)
-        else Space(Empty, isTarget)
-
-      c -> space
-    }.toMap
-  }
-
+  /** has this level ended? */
   def isFinished: Boolean = isSolved.isDefined
 }
 
 object GameState {
-
-  type SpacesMap = Map[Coord, Space]
 
   def newForLevel(sourceLevel: Level) = new GameState {
      val level = sourceLevel
@@ -106,7 +93,6 @@ object GameState {
         else 
           // Move not possible: crate would go outside given gs locations.
           gs
-
       }
     }
     else 
@@ -114,6 +100,10 @@ object GameState {
       gs
   }
 
+  /** Undo the last game step.
+   *  @param gs the current game state.
+   *  @return the new game state with the undo applied.
+   */
   def undo(gs: GameState): GameState = gs.history match {
     case h :: tail => 
       new GameState {
@@ -127,15 +117,25 @@ object GameState {
       gs // No history to go back to
   }
 
-  def allSteps(gs: GameState): String = gs.history.map(_.appliedDirection).map(direction2char).mkString.reverse
+  /** Return all game steps.
+   *  @param gs the current game state.
+   *  @return a string containing all game steps from first to last.
+   */
+  def allStepsString(gs: GameState): String = gs.history.map(_.appliedDirection).map(direction2char).mkString.reverse
 
+  /** Translate a Direction to a Char */
   private def direction2char(d: Direction) = d match {
     case Down =>  'd'
     case Left =>  'l'
     case Right => 'r'
     case Up =>    'u'
   }
-  // Return the Coord that results from moving from c into direction d.
+
+  /** Return the Coord that results from moving from c into direction d.
+   *  @param c current position.
+   *  @param d direction to apply.
+   *  @return the new position.
+   */
   private def applyDirection(c: Coord, d: Direction): Coord = d match {
     case Direction.Up    => Coord(c.x, c.y - 1)
     case Direction.Right => Coord(c.x + 1, c.y)

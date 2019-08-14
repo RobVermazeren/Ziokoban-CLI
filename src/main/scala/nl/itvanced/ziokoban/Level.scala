@@ -14,13 +14,13 @@ trait Level {
   /** calculated width of this map */
   lazy val width: Int = map.keySet.map(_.x).max + 1
 
-  /** set of all valid spaces on this map */
+  /** valid spaces on this map */
   def spaces: Set[Coord]
 
   /** the starting location of the pusher */
   def pusher: Coord
 
-  /** set of all walls on this map */
+  /** walls on this map */
   def walls: Set[Coord]
 
   /** @param c location. 
@@ -28,7 +28,7 @@ trait Level {
    */
   def isWall(c: Coord): Boolean = walls.contains(c) 
 
-  /** set of the initial locations of all crates on this map */
+  /** initial locations of all crates on this map */
   def crates: Set[Coord]
 
   /** @param c location. 
@@ -36,7 +36,7 @@ trait Level {
    */
   def hasCrate(c: Coord): Boolean = crates.contains(c)
 
-  /** set of all targets on this map */
+  /** targets on this map */
   def targets: Set[Coord]
 
   /** @param c location. 

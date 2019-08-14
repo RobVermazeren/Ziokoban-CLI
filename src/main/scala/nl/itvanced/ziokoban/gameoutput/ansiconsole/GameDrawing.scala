@@ -24,22 +24,25 @@ final case class GameDrawing(config: CharConfig) {
     case Empty => Color(BaseColor.White, Color.IsBright)
   }
 
-  private def drawGameSpace(c: Coord, space: Space): ConsoleDrawState[Unit] =  
+  private def drawGameSpace(c: Coord, o: Occupant, isTarget: Boolean): ConsoleDrawState[Unit] =  
     for {
-      _ <- Draw.setForeGroundColor(colorFor(space.occupant))
-      _ <- Draw.setBackGroundColor(if (space.isTarget) targetTileColor else tileColor)
-      s <- Draw.drawChar(c, charFor(space.occupant)) 
+      _ <- Draw.setForeGroundColor(colorFor(o))
+      _ <- Draw.setBackGroundColor(if (isTarget) targetTileColor else tileColor)
+      s <- Draw.drawChar(c, charFor(o)) 
     } yield s
 
-  def drawStatic(position: Coord => Coord)(gs: GameState): ConsoleDrawState[Unit] = 
+  def drawStatic(levelToScreenPosition: Coord => Coord)(gs: GameState): ConsoleDrawState[Unit] = 
     for {
       _ <- Draw.setBackGroundColor(wallColor)
-      s <- Draw.drawChars(gs.level.walls.map(position), ' ')
+      s <- Draw.drawChars(gs.level.walls.map(levelToScreenPosition), ' ')
     } yield s
 
-  def drawDynamic(position: Coord => Coord)(gs: GameState): ConsoleDrawState[Unit] = {
-    gs.spacesMap.foldLeft(State.pure(Unit): ConsoleDrawState[Unit]) { case (state, (coord, space)) =>
-      state flatMap (_ => drawGameSpace(position(coord), space))
+  def drawDynamic(levelToScreenPosition: Coord => Coord)(gs: GameState): ConsoleDrawState[Unit] = {
+    gs.level.spaces.foldLeft(State.pure(Unit): ConsoleDrawState[Unit]) { case (state, coord) =>
+      val occupant = if (gs.pusher == coord) Pusher
+      else if (gs.crates.contains(coord)) Crate
+      else Empty
+      state flatMap (_ => drawGameSpace(levelToScreenPosition(coord), occupant, gs.level.isTarget(coord)))
     }
   }
 }

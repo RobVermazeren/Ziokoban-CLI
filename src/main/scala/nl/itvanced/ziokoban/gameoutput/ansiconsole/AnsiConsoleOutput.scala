@@ -20,7 +20,7 @@ final case class AnsiConsoleOutput private (
       */
     final def drawGameState(state: GameState): Task[Unit] = {
       val drawing: ConsoleDrawState[Unit] = for {
-        _ <- gameDrawing.drawDynamic(c => Coord(c.x + 3, c.y + 3))(state)
+        _ <- gameDrawing.drawDynamic(toScreenCoord)(state)
       } yield ()
       val result = drawing.run(Ansi.ansi()).value._1
       Task.effect(AnsiConsole.out.println(result))
@@ -33,7 +33,7 @@ final case class AnsiConsoleOutput private (
         _ <- Draw.hideCursor
         _ <- Draw.setForeGroundColor(Color.Border)
         _ <- Draw.drawBorder(1, 1, state.level.width + 4, state.level.height + 4)
-        _ <- gameDrawing.drawStatic(c => Coord(c.x + 3, c.y + 3))(state)
+        _ <- gameDrawing.drawStatic(toScreenCoord)(state)
       } yield ()
       val result = drawing.run(Ansi.ansi()).value._1
       Task.effect(AnsiConsole.out.println(result))
@@ -56,6 +56,9 @@ final case class AnsiConsoleOutput private (
     final def println[A](text: A): Task[Unit] = {
       Task.effect(AnsiConsole.out.println(text))
     }
+
+    /** Transform level position to screen position */
+    private def toScreenCoord(c: Coord) = Coord(c.x + 3, c.y + 3)
   }
 }
 
