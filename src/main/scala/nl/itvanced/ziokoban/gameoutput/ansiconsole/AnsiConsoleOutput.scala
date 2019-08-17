@@ -33,7 +33,7 @@ final case class AnsiConsoleOutput private (
         _ <- Draw.hideCursor
         _ <- Draw.setForeGroundColor(Color.Border)
         _ <- Draw.drawBorder(1, 1, state.level.width + 4, state.level.height + 4)
-        _ <- gameDrawing.drawStatic(toScreenCoord)(state)
+        _ <- gameDrawing.drawStatic(toScreenCoord)(state.level)
       } yield ()
       val result = drawing.run(Ansi.ansi()).value._1
       Task.effect(AnsiConsole.out.println(result))
