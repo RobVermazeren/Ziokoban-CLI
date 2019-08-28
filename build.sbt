@@ -36,6 +36,8 @@ libraryDependencies ++= Seq(
   "org.typelevel" %% "cats-core" % CatsVersion,
   // PureConfig
   "com.github.pureconfig" %% "pureconfig" % "0.11.0",   
+  // XML reading
+  "com.lucidchart" %% "xtract" % "2.0.1",
   // Console handling
   "org.fusesource.jansi" % "jansi" % "1.17.1",
   "org.jline"            % "jline" % "3.10.0",
