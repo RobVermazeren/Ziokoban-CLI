@@ -2,8 +2,11 @@ package nl.itvanced.ziokoban.levels.slc
 
 object Example {
 
-  val original: String = """
-  <?xml version="1.0" encoding="utf-8"?>
+  lazy val original: String = originalRaw.dropWhile(_ != '<') 
+
+  private val originalRaw: String = 
+  """
+<?xml version="1.0" encoding="utf-8"?>
 <SokobanLevels xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="SokobanLev.xsd">
   <Title>Original &amp; Extra</Title>
   <Description>
@@ -1410,6 +1413,6 @@ The 50 original levels from Sokoban plus the 40 from Extra.
     </Level>
   </LevelCollection>
 </SokobanLevels>
-  """
+"""
 
 }
