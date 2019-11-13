@@ -1,6 +1,7 @@
 package nl.itvanced
 
 import zio.App
+import zio.ZEnv
 
 object ZiokobanApp extends App {
   import nl.itvanced.ziokoban.{GameState, Level}
@@ -13,7 +14,7 @@ object ZiokobanApp extends App {
   import nl.itvanced.ziokoban.gameoutput.ansiconsole.AnsiConsoleOutput
   import zio.ZIO
 
-  def run(args: List[String]): ZIO[Environment, Nothing, Int] = {
+  def run(args: List[String]): ZIO[ZEnv, Nothing, Int] = {
     for { 
       conf   <- GameConfig.load()
       env    <- createEnvironment(conf)
@@ -21,7 +22,7 @@ object ZiokobanApp extends App {
     } yield result
   }.either.map(_.fold(_ => 1, _ => 0))
 
-  def createEnvironment(c: GameConfig): ZIO[Environment, Throwable, GameOutput with GameInput with LevelsSource] = 
+  def createEnvironment(c: GameConfig): ZIO[ZEnv, Throwable, GameOutput with GameInput with LevelsSource] = 
     for {
       input <- GameInput.JLineGameInput()
       output <- AnsiConsoleOutput(c.gameOutput)

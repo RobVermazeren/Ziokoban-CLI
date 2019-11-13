@@ -5,7 +5,7 @@ import java.util.concurrent.TimeUnit
 import nl.itvanced.ziokoban.GameCommands
 import zio.clock.Clock
 import zio.duration.Duration
-import zio.{Queue, Ref, Schedule, Task, UIO, ZIO}
+import zio.{Queue, Ref, ZSchedule, Task, UIO, ZIO}
 import org.jline.utils.NonBlockingReader
 
 trait GameInput extends Serializable {
@@ -87,7 +87,7 @@ object GameInput extends Serializable {
             _ <- ref.set(newCommand)
           } yield ()
       }
-    }.repeat(Schedule.spaced(Duration(500, TimeUnit.MILLISECONDS)))
+    }.repeat(ZSchedule.spaced(Duration(500, TimeUnit.MILLISECONDS)))
       .provide(Clock.Live)
       .unit
   }
@@ -142,7 +142,7 @@ object GameInput extends Serializable {
           case Left(s) => ZIO.unit // TODO: any errors are ignored.
         }
       } yield ()
-    }.repeat(Schedule.spaced(Duration(2, TimeUnit.MILLISECONDS)))
+    }.repeat(ZSchedule.spaced(Duration(2, TimeUnit.MILLISECONDS)))
       .provide(Clock.Live)
       .unit
 
