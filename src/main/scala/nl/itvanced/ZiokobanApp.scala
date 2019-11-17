@@ -73,27 +73,27 @@ object ZiokobanApp extends App {
   ): ZIO[GameOutput with GameInput, Throwable, GameState] =
     for {
       c <- nextCommand()
-      r <- {
-        c.getOrElse(Noop) match {
-          case mc: MoveCommand => {
-            val newGameState = GameState.move(gs, moveCommand2Direction(mc))
-            for {
-              _ <- drawGameState(newGameState)
-            } yield newGameState
-          }
-          case Undo => {
-            val newGameState = GameState.undo(gs)
-            for {
-              _ <- drawGameState(newGameState)
-            } yield newGameState
-          }
-          case Quit => ZIO.effectTotal[GameState](GameState.stopGame(gs))
-          case Noop =>
-            ZIO.effectTotal[GameState](gs) // RVNOTE: wait for a moment?
-        }
-      }
+      r <- processCommand(c.getOrElse(Noop), gs)
       s <- if (r.isFinished) ZIO.succeed(r) else gameLoop(r)
     } yield s
+  
+  private def processCommand(gc: GameCommand, gs: GameState): ZIO[GameOutput, Throwable, GameState] = gc match {
+     case mc: MoveCommand => {
+       val newGameState = GameState.move(gs, moveCommand2Direction(mc))
+       for {
+         _ <- drawGameState(newGameState)
+       } yield newGameState
+     }
+     case Undo => {
+       val newGameState = GameState.undo(gs)
+       for {
+         _ <- drawGameState(newGameState)
+       } yield newGameState
+     }
+     case Quit => ZIO.effectTotal[GameState](GameState.stopGame(gs))
+     case Noop =>
+       ZIO.effectTotal[GameState](gs) // RVNOTE: wait for a moment?
+  }
 
   private def moveCommand2Direction(mc: MoveCommand): Direction = mc match { 
     case MoveUp    => Direction.Up
