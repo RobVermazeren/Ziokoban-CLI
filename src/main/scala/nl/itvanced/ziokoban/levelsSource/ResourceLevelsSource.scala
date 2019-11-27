@@ -1,7 +1,7 @@
 package nl.itvanced.ziokoban.levelsSource
 
 import nl.itvanced.ziokoban.Level
-import nl.itvanced.ziokoban.levels.AsciiLevelFormat
+import nl.itvanced.ziokoban.levels.format.AsciiLevelFormat
 import zio.{Task, UIO}
 import scala.io.Source
 import scala.util.{Failure, Try}

@@ -4,7 +4,7 @@ import nl.itvanced.ziokoban.{Level => GeneralLevel}
 import nl.itvanced.ziokoban.levels.{LevelCollection => GeneralLevelCollection}
 import nl.itvanced.ziokoban.levels.LevelMap
 import scala.util.{Failure, Success, Try}
-import nl.itvanced.ziokoban.levels.AsciiLevelFormat
+import nl.itvanced.ziokoban.levels.format.AsciiLevelFormat
 
 case class SokobanLevels(
   title: String,
