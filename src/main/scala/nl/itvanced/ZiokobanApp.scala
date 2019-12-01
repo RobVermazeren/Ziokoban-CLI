@@ -26,7 +26,7 @@ object ZiokobanApp extends App {
     for {
       input <- GameInput.JLineGameInput()
       output <- AnsiConsoleOutput(c.gameOutput)
-      source <- ResourceLevelsSource()
+      source <- ResourceLevelsSource() // RVNOTE: This will be replaced 
     } yield {
       new GameOutput with GameInput with LevelsSource {
         val gameInput = input.gameInput

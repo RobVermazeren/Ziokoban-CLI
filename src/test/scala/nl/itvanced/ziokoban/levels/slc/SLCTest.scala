@@ -160,7 +160,6 @@ class SLCTest extends FreeSpec with Matchers {
                     () => List(level(copyright = None, height = None, width = None))  
                 )
       )   
-      println(fullAllNone)
     
     val invalidCases = List(
       "no title"    -> create(title = None), 
@@ -177,7 +176,7 @@ class SLCTest extends FreeSpec with Matchers {
 
   "SLC.loadFromString" - {
     "given a valid slc string (all optional values provided)" - {
-      "should return corresponding SokobanLevels instance" in {
+      "should return corresponding SlcSokobanLevels instance" in {
         val r = SLC.loadFromString(TestCases.fullAllSome)
         val sokobanLevels = r.success.value
 

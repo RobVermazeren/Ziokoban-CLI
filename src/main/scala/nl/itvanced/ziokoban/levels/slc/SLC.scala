@@ -7,18 +7,18 @@ import java.io.File
 
 object SLC {
 
-  def loadFromString(s: String): Try[SokobanLevels] = {
+  def loadFromString(s: String): Try[SlcSokobanLevels] = {
     val rootNode = XML.loadString(s)
-    sokobanLevelsFromXML(rootNode)
+    sokobanSlcLevelsFromXML(rootNode)
   }
 
-  def sokobanLevelsFromXML(node: Node): Try[SokobanLevels] = for {
+  def sokobanSlcLevelsFromXML(node: Node): Try[SlcSokobanLevels] = for {
     levelCollection <- levelCollectionFromXML((node \ "LevelCollection"))
   } yield { 
     val title = (node \ "Title").text
-    if (title.isEmpty) throw new Exception("SokobanLevels must contain a Title")
+    if (title.isEmpty) throw new Exception("SlcSokobanLevels must contain a Title")
     val description = (node \ "Description").text
-    if (description.trim.isEmpty) throw new Exception("SokobanLevels must contain a Decription")
+    if (description.trim.isEmpty) throw new Exception("SlcSokobanLevels must contain a Decription")
     val trimmedDescription = {
       val trimmedLines = description.lines.toList.map(_.trim)
       val relevantLines = trimmedLines.dropWhile(_.isEmpty()).reverse.dropWhile(_.isEmpty()).reverse // remove leading and trailing empty lines.
@@ -32,7 +32,7 @@ object SLC {
       val raw = (node \ "Url").text
       if (raw.isEmpty) None else Option(raw)
     }
-    SokobanLevels(
+    SlcSokobanLevels(
       title       = title,
       description = trimmedDescription,
       email       = email,
@@ -41,11 +41,11 @@ object SLC {
     )
   }
 
-  def levelCollectionFromXML(nodes: NodeSeq): Try[LevelCollection] = for {
-    levels <- getLevelsFromXML(nodes \ "Level")
+  def levelCollectionFromXML(nodes: NodeSeq): Try[SlcLevelCollection] = for {
+    levels <- getSlcLevelsFromXML(nodes \ "Level")
   } yield {
     val copyright = (nodes \ "@Copyright").text
-    if (copyright.isEmpty) throw new Exception("SokobanLevels.LevelCollection must contain a Copyright")
+    if (copyright.isEmpty) throw new Exception("SlcSokobanLevels.SlcLevelCollection must contain a Copyright")
     val maxHeight = {
       val raw = (nodes \ "@MaxHeight").text
       if (raw.isEmpty) None else Option(raw.toInt)
@@ -54,7 +54,7 @@ object SLC {
       val raw = (nodes \ "@MaxWidth").text
       if (raw.isEmpty) None else Option(raw.toInt)
     }
-    LevelCollection(
+    SlcLevelCollection(
       copyright = copyright,
       maxHeight = maxHeight,
       maxWidth = maxWidth,
@@ -62,11 +62,11 @@ object SLC {
     )
   }
 
-  def getLevelsFromXML(nodes: NodeSeq): Try[List[Level]] = { 
-    val allLevels: List[Try[Level]]  = nodes.map(levelFromXML).toList 
-    if (allLevels.length > 0) {
-      val successes: List[Level] = allLevels.flatMap(_.toOption)
-      val failures: List[Throwable] = allLevels.flatMap(_.failed.toOption)    
+  def getSlcLevelsFromXML(nodes: NodeSeq): Try[List[SlcLevel]] = { 
+    val allSlcLevels: List[Try[SlcLevel]]  = nodes.map(levelFromXML).toList 
+    if (allSlcLevels.length > 0) {
+      val successes: List[SlcLevel] = allSlcLevels.flatMap(_.toOption)
+      val failures: List[Throwable] = allSlcLevels.flatMap(_.failed.toOption)    
       def allErrorMessages(ts: List[Throwable]) = ts.map(_.getMessage()).mkString(" |")
       failures match {
         case Nil => Success(successes)
@@ -77,9 +77,9 @@ object SLC {
     }
   }
 
-  def levelFromXML(node: Node): Try[Level] = Try {
+  def levelFromXML(node: Node): Try[SlcLevel] = Try {
     val id = (node \ "@Id").text
-    if (id.isEmpty) throw new Exception("SokobanLevels.LevelCollection.Level must contain an Id")
+    if (id.isEmpty) throw new Exception("SlcSokobanLevels.SlcLevelCollection.SlcLevel must contain an Id")
     val copyright = {
       val raw = (node \ "@Copyright").text
       if (raw.isEmpty) None else Option(raw)
@@ -93,8 +93,8 @@ object SLC {
       if (raw.isEmpty) None else Option(raw.toInt)
     }
     val lines = (node \ "L").map(_.text).toList
-    if (lines.isEmpty) throw new Exception("SokobanLevels.LevelCollection.Level must contain at least one line")
-    Level(
+    if (lines.isEmpty) throw new Exception("SlcSokobanLevels.SlcLevelCollection.SlcLevel must contain at least one line")
+    SlcLevel(
       id = id,
       copyright = copyright,
       height = height,
