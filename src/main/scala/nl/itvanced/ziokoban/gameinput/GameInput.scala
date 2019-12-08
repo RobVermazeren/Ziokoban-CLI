@@ -19,6 +19,7 @@ object GameInput extends Serializable {
     def nextCommand(): ZIO[R, Nothing, Option[GameCommand]]
   }
 
+  // Helper object, with methods that delegate to the corresponding method from the Environment.
   object > extends GameInput.Service[GameInput] {
     def nextCommand: ZIO[GameInput, Nothing, Option[GameCommands.GameCommand]] =
       ZIO.accessM(_.gameInput nextCommand())
