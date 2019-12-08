@@ -35,9 +35,19 @@ object ZiokobanApp extends App {
       }
     }
 
+//  def program = for {
+//      levelCollection <- getLevelCollection  // For the moment a hard-coded 
+//      programResult   <- playWithLevelCollection(levelCollection) // loop: select level, play level, ask what next.   
+//  } yield programResult
+
+//  def playWithLevelCollection(lv: LevelCollection) = for {
+//  level <- selectLevel
+//    result <- playLevel(level)
+//  } yield result
+  
   def startGame: ZIO[GameOutput with GameInput with LevelsSource, Throwable, Unit] = {
     for {
-      l <- loadLevel("levels/test.sok")
+      l <- LevelsSource.>.loadLevel("levels/test.sok")
       _ <- l match {
           case None =>        
             println("This is not a valid level")
