@@ -14,4 +14,17 @@ object GameOutput extends Serializable {
     def postDrawing(state: GameState): ZIO[R, Throwable, Unit]
     def println[A](text: A): ZIO[R, Throwable, Unit]
   }
+ object > extends GameOutput.Service[GameOutput] {
+  final def drawGameState(state: GameState): ZIO[GameOutput, Throwable, Unit] =
+    ZIO.accessM(_.gameOutput drawGameState state)
+
+  final def preDrawing(state: GameState): ZIO[GameOutput, Throwable, Unit] =
+    ZIO.accessM(_.gameOutput preDrawing state)  
+
+  final def postDrawing(state: GameState): ZIO[GameOutput, Throwable, Unit] =
+    ZIO.accessM(_.gameOutput postDrawing state)  
+
+  final def println[A](text: A): ZIO[GameOutput, Throwable, Unit] =
+    ZIO.accessM(_.gameOutput println text)
+}
 }

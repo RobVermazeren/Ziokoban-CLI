@@ -50,15 +50,15 @@ object ZiokobanApp extends App {
       l <- LevelsSource.>.loadLevel("levels/test.sok")
       _ <- l match {
           case None =>        
-            println("This is not a valid level")
+            GameOutput.>.println("This is not a valid level")
 
           case Some(level) => 
             for {
               won <- playLevel(level)
             } yield {
-              if (won) println("Congratulations, you won!") 
-              else     println("Better luck next time")
-            } *> println("Thank you for playing ZIOKOBAN") 
+              if (won) GameOutput.>.println("Congratulations, you won!") 
+              else     GameOutput.>.println("Better luck next time")
+            } *> GameOutput.>.println("Thank you for playing ZIOKOBAN") 
           }
     } yield ()
   }
@@ -66,15 +66,15 @@ object ZiokobanApp extends App {
   private def playLevel(level: Level): ZIO[GameOutput with GameInput, Throwable, Boolean]  = { 
     val gameState = GameState.startLevel(level)
     for {
-      _  <- preDrawing(gameState)
-      _  <- drawGameState(gameState)
+      _  <- GameOutput.>.preDrawing(gameState)
+      _  <- GameOutput.>drawGameState(gameState)
       gs <- gameLoop(gameState)
-      _  <- postDrawing(gs)
+      _  <- GameOutput.>postDrawing(gs)
       _  <- gs.isSolved match {
-        case Some(true) => println(s"Congratulations, you won! \n\nYour steps were ${GameState.allStepsString(gs)}\n")
-        case _ => println("Better luck next time")
+        case Some(true) => GameOutput.>.println(s"Congratulations, you won! \n\nYour steps were ${GameState.allStepsString(gs)}\n")
+        case _ => GameOutput.>.println("Better luck next time")
       }
-      _  <- println("Thank you for playing ZIOKOBAN")
+      _  <- GameOutput.>.println("Thank you for playing ZIOKOBAN")
     } yield gs.isSolved.getOrElse(false)
   }
 
@@ -91,13 +91,13 @@ object ZiokobanApp extends App {
      case mc: MoveCommand => {
        val newGameState = GameState.move(gs, moveCommand2Direction(mc))
        for {
-         _ <- drawGameState(newGameState)
+         _ <- GameOutput.>.drawGameState(newGameState)
        } yield newGameState
      }
      case Undo => {
        val newGameState = GameState.undo(gs)
        for {
-         _ <- drawGameState(newGameState)
+         _ <- GameOutput.>.drawGameState(newGameState)
        } yield newGameState
      }
      case Quit => ZIO.effectTotal[GameState](GameState.stopGame(gs))
