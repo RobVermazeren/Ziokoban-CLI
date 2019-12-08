@@ -24,7 +24,7 @@ object ZiokobanApp extends App {
 
   def createEnvironment(c: GameConfig): ZIO[ZEnv, Throwable, GameOutput with GameInput with LevelsSource] = 
     for {
-      input <- GameInput.JLineGameInput()
+      input  <- JLineGameInput()
       output <- AnsiConsoleOutput(c.gameOutput)
       source <- ResourceLevelsSource() // RVNOTE: This will be replaced 
     } yield {
@@ -82,7 +82,7 @@ object ZiokobanApp extends App {
       gs: GameState
   ): ZIO[GameOutput with GameInput, Throwable, GameState] =
     for {
-      c <- nextCommand()
+      c <- GameInput.>.nextCommand()
       r <- processCommand(c.getOrElse(Noop), gs)
       s <- if (r.isFinished) ZIO.succeed(r) else gameLoop(r)
     } yield s
