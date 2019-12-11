@@ -67,9 +67,9 @@ object ZiokobanApp extends App {
     val gameState = GameState.startLevel(level)
     for {
       _  <- GameOutput.>.preDrawing(gameState)
-      _  <- GameOutput.>drawGameState(gameState)
+      _  <- GameOutput.>.drawGameState(gameState)
       gs <- gameLoop(gameState)
-      _  <- GameOutput.>postDrawing(gs)
+      _  <- GameOutput.>.postDrawing(gs)
       _  <- gs.isSolved match {
         case Some(true) => GameOutput.>.println(s"Congratulations, you won! \n\nYour steps were ${GameState.allStepsString(gs)}\n")
         case _ => GameOutput.>.println("Better luck next time")
