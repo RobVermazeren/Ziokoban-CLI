@@ -1,16 +1,24 @@
 package nl.itvanced.ziokoban.levelsSource
 
+import zio.{Task, UIO, ZIO, ZLayer}
 import nl.itvanced.ziokoban.Level
 import nl.itvanced.ziokoban.levels.LevelCollection
 import nl.itvanced.ziokoban.levels.format.AsciiLevelFormat
 import nl.itvanced.ziokoban.levels.slc.{SLC, Example}
-import zio.{Task, UIO}
 import scala.io.Source
 import scala.util.{Failure, Try}
 import nl.itvanced.ziokoban.levels.slc.SlcSokobanLevels
 
-trait ResourceLevelsSource extends LevelsSource { // RVNOTE: this file will be obsolete once slc files are supported. 
-  def levelsSource: LevelsSource.Service[Any] = new LevelsSource.Service[Any] {
+object ResourceLevelsSource {
+  
+  val live: ZLayer[Any, Throwable, LevelsSource] = { 
+    ZLayer.succeed(
+      LiveService()
+    )
+  }
+
+  case class LiveService() extends LevelsSource.Service {
+
     final def loadLevel(id: String): Task[Option[Level]] = { 
       loadResource(id) match {
         case Failure(_: java.io.FileNotFoundException) => // File not found is valid outcome, being translated to None
@@ -28,16 +36,13 @@ trait ResourceLevelsSource extends LevelsSource { // RVNOTE: this file will be o
       } yield lc)
       Task.fromTry(t)
     }
+
+
+    private def loadResource(resourcePath: String): Try[List[String]] = Try {
+      Source.fromResource(resourcePath).getLines.toList
+    }
+
+    private def toLevel(lines: List[String]): Option[Level] =
+      AsciiLevelFormat.toLevelMap(lines).flatMap(Level.fromLevelMap(_)).toOption
   }
-
-  private def loadResource(resourcePath: String): Try[List[String]] = Try {
-    Source.fromResource(resourcePath).getLines.toList
-  }
-
-  private def toLevel(lines: List[String]): Option[Level] =
-    AsciiLevelFormat.toLevelMap(lines).flatMap(Level.fromLevelMap(_)).toOption
-}
-
-object ResourceLevelsSource {
-  def apply(): UIO[LevelsSource] = UIO(new ResourceLevelsSource {})
 }

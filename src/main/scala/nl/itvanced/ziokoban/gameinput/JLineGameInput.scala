@@ -1,6 +1,6 @@
 package nl.itvanced.ziokoban.gameinput
 
-import zio.{Queue, Schedule, Task, UIO, ZIO}
+import zio.{Queue, Ref, Schedule, Task, UIO, ZIO, ZLayer}
 import zio.clock.Clock
 import zio.duration.Duration
 import java.util.concurrent.TimeUnit
@@ -8,36 +8,42 @@ import org.jline.utils.NonBlockingReader
 
 import nl.itvanced.ziokoban.GameCommands
 import nl.itvanced.ziokoban.GameCommands.GameCommand
+import zio.blocking.Blocking
 
 //=== Version of GameInput that takes input from JLine NonBlockingReader ===
-final case class JLineGameInput private (
+object JLineGameInput {
+  import GameCommands._
+
+  val live: ZLayer[Clock, Throwable, GameInput] = {
+    ZLayer.fromEffect(
+      newLiveService()
+    )
+  }
+
+  // Create a JLineGameInput instance with a queue containing the given commands, feeded from JLine NonBlockingReader.
+  def newLiveService(): ZIO[Clock, Throwable, GameInput.Service] = {
+    for {
+      q   <- Queue.bounded[GameCommand](100)
+      nbr <- ZIO.effect[NonBlockingReader](createReader()) // Can throw exception, so Throwable error type.
+      _   <- handleJLineInput(q, nbr).fork // start process that reads keys from JLine terminal and pushes these as GameCommands to Queue.
+    } yield LiveService(q)
+  }
+
+  final case class LiveService private (
     queue: Queue[GameCommand]
-) extends GameInput {
-  val gameInput: GameInput.Service[Any] = new GameInput.Service[Any] {
-    import GameCommands._
+  ) extends GameInput.Service {
     // Return next command, taken from Ref. Ref will contain None afterwards.
     final def nextCommand(): UIO[Option[GameCommand]] =
       for {
-        g <- queue.take.fork // Wait for next command on seperate fiber
+       g <- queue.take.fork // Wait for next command on seperate fiber
         gc <- g.join
-      } yield Some(gc)
+     } yield Some(gc)
   }
-}
-
-object JLineGameInput {
-  import zio.blocking._
-
-  def apply(): Task[GameInput] =
-    for {
-      q <- Queue.bounded[GameCommand](100)
-      nbr <- ZIO.effect[NonBlockingReader](createReader())
-      _ <- handleJLineInput(q, nbr).fork // start process that reads keys from JLine terminal and pushes these as GameCommands to Queue.
-    } yield new JLineGameInput(q)
 
   private def handleJLineInput(
       queue: Queue[GameCommand],
       reader: NonBlockingReader
-  ): UIO[Unit] = {
+  ): ZIO[Clock, Nothing, Unit] = {
     for {
       e <- ZIO
         .effect[Int](reader.read)
@@ -60,7 +66,6 @@ object JLineGameInput {
       }
     } yield ()
   }.repeat(Schedule.spaced(Duration(2, TimeUnit.MILLISECONDS)))
-    .provide(Clock.Live)
     .unit
 
   def createReader(): NonBlockingReader = {
@@ -72,4 +77,5 @@ object JLineGameInput {
     terminal.enterRawMode()
     terminal.reader()
   }
+
 }

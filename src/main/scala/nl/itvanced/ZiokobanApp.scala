@@ -1,9 +1,9 @@
 package nl.itvanced
 
-import zio.App
-import zio.ZEnv
+import zio.{App, UIO, ZEnv}
 
 object ZiokobanApp extends App {
+  import zio.console.putStrLn
   import nl.itvanced.ziokoban.{GameState, Level}
   import nl.itvanced.ziokoban.Model.Direction
   import nl.itvanced.ziokoban.gameoutput._
@@ -14,51 +14,43 @@ object ZiokobanApp extends App {
   import nl.itvanced.ziokoban.gameoutput.ansiconsole.AnsiConsoleOutput
   import zio.ZIO
 
-  def run(args: List[String]): ZIO[ZEnv, Nothing, Int] = {
-    for { 
-      conf   <- GameConfig.load()
-      env    <- createEnvironment(conf)
-      result <- startGame.provide(env)
-    } yield result
-  }.either.map(_.fold(_ => 1, _ => 0))
+  def run(args: List[String]): ZIO[ZEnv,Nothing,Int] = {
+    makeProgram().foldM(
+      err => putStrLn(s"Execution failed with $err") *> 
+             UIO.succeed(1), // Failure
+      _   => UIO.succeed(0)  // Success      
+    )
+  }
 
-  def createEnvironment(c: GameConfig): ZIO[ZEnv, Throwable, GameOutput with GameInput with LevelsSource] = 
+  def makeProgram(): ZIO[ZEnv, Throwable, Unit] = {
     for {
-      input  <- JLineGameInput()
-      output <- AnsiConsoleOutput(c.gameOutput)
-      source <- ResourceLevelsSource() // RVNOTE: This will be replaced 
-    } yield {
-      new GameOutput with GameInput with LevelsSource {
-        val gameInput = input.gameInput
-        val gameOutput = output.gameOutput
-        val levelsSource = source.levelsSource
+      c <- GameConfig.load() // RVNOTE: when config is a layer this method will be simpler. No for comprehension needed.
+      _ <- {
+        val gameInputLayer = JLineGameInput.live
+        val gameOutputLayer = AnsiConsoleOutput.live(c.gameOutput)
+        val levelsSourceLayer = ResourceLevelsSource.live
+
+        val layers = gameInputLayer ++ gameOutputLayer ++ levelsSourceLayer
+
+        bareProgram.provideSomeLayer[ZEnv](layers) // Provide all the required layers, except ZEnv. 
       }
-    }
+    } yield ()
+  }
 
-//  def program = for {
-//      levelCollection <- getLevelCollection  // For the moment a hard-coded 
-//      programResult   <- playWithLevelCollection(levelCollection) // loop: select level, play level, ask what next.   
-//  } yield programResult
-
-//  def playWithLevelCollection(lv: LevelCollection) = for {
-//  level <- selectLevel
-//    result <- playLevel(level)
-//  } yield result
-  
-  def startGame: ZIO[GameOutput with GameInput with LevelsSource, Throwable, Unit] = {
+  val bareProgram: ZIO[GameOutput with GameInput with LevelsSource, Throwable, Unit] = { // RVNOTE: better name. UnprovidedProgram???
     for {
-      l <- LevelsSource.>.loadLevel("levels/test.sok")
+      l <- LevelsSource.loadLevel("levels/test.sok")
       _ <- l match {
           case None =>        
-            GameOutput.>.println("This is not a valid level")
+            GameOutput.println("This is not a valid level")
 
           case Some(level) => 
             for {
               won <- playLevel(level)
             } yield {
-              if (won) GameOutput.>.println("Congratulations, you won!") 
-              else     GameOutput.>.println("Better luck next time")
-            } *> GameOutput.>.println("Thank you for playing ZIOKOBAN") 
+              if (won) GameOutput.println("Congratulations, you won!") 
+              else     GameOutput.println("Better luck next time")
+            } *> GameOutput.println("Thank you for playing ZIOKOBAN") 
           }
     } yield ()
   }
@@ -66,15 +58,15 @@ object ZiokobanApp extends App {
   private def playLevel(level: Level): ZIO[GameOutput with GameInput, Throwable, Boolean]  = { 
     val gameState = GameState.startLevel(level)
     for {
-      _  <- GameOutput.>.preDrawing(gameState)
-      _  <- GameOutput.>.drawGameState(gameState)
+      _  <- GameOutput.preDrawing(gameState)
+      _  <- GameOutput.drawGameState(gameState)
       gs <- gameLoop(gameState)
-      _  <- GameOutput.>.postDrawing(gs)
+      _  <- GameOutput.postDrawing(gs)
       _  <- gs.isSolved match {
-        case Some(true) => GameOutput.>.println(s"Congratulations, you won! \n\nYour steps were ${GameState.allStepsString(gs)}\n")
-        case _ => GameOutput.>.println("Better luck next time")
+        case Some(true) => GameOutput.println(s"Congratulations, you won! \n\nYour steps were ${GameState.allStepsString(gs)}\n")
+        case _ => GameOutput.println("Better luck next time")
       }
-      _  <- GameOutput.>.println("Thank you for playing ZIOKOBAN")
+      _  <- GameOutput.println("Thank you for playing ZIOKOBAN")
     } yield gs.isSolved.getOrElse(false)
   }
 
@@ -82,7 +74,7 @@ object ZiokobanApp extends App {
       gs: GameState
   ): ZIO[GameOutput with GameInput, Throwable, GameState] =
     for {
-      c <- GameInput.>.nextCommand()
+      c <- GameInput.nextCommand()
       r <- processCommand(c.getOrElse(Noop), gs)
       s <- if (r.isFinished) ZIO.succeed(r) else gameLoop(r)
     } yield s
@@ -91,13 +83,13 @@ object ZiokobanApp extends App {
      case mc: MoveCommand => {
        val newGameState = GameState.move(gs, moveCommand2Direction(mc))
        for {
-         _ <- GameOutput.>.drawGameState(newGameState)
+         _ <- GameOutput.drawGameState(newGameState)
        } yield newGameState
      }
      case Undo => {
        val newGameState = GameState.undo(gs)
        for {
-         _ <- GameOutput.>.drawGameState(newGameState)
+         _ <- GameOutput.drawGameState(newGameState)
        } yield newGameState
      }
      case Quit => ZIO.effectTotal[GameState](GameState.stopGame(gs))
