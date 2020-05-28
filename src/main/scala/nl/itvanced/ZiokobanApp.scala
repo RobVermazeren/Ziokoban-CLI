@@ -1,6 +1,7 @@
 package nl.itvanced
 
 import zio.{App, UIO, ZEnv}
+import zio.ExitCode
 
 object ZiokobanApp extends App {
   import zio.console.putStrLn
@@ -14,12 +15,9 @@ object ZiokobanApp extends App {
   import nl.itvanced.ziokoban.gameoutput.ansiconsole.AnsiConsoleOutput
   import zio.ZIO
 
-  def run(args: List[String]): ZIO[ZEnv,Nothing,Int] = {
-    makeProgram().foldM(
-      err => putStrLn(s"Execution failed with $err") *> 
-             UIO.succeed(1), // Failure
-      _   => UIO.succeed(0)  // Success      
-    )
+  def run(args: List[String]): ZIO[ZEnv, Nothing, ExitCode] = {
+    makeProgram().exitCode
+    // RVNOTE: println for error code putStrLn(s"Execution failed with $err") *> 
   }
 
   def makeProgram(): ZIO[ZEnv, Throwable, Unit] = {
