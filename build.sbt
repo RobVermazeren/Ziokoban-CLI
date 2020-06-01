@@ -27,7 +27,7 @@ scalacOptions ++= Seq(
 javacOptions ++= Seq("-Xlint:unchecked", "-Xlint:deprecation", "-source", "1.8", "-target", "1.8")
 
 val CatsVersion = "1.6.1"
-val ZIOVersion  = "1.0.0-RC10-1"
+val ZIOVersion  = "1.0.0-RC20"
 
 libraryDependencies ++= Seq(
   // ZIO
@@ -36,12 +36,16 @@ libraryDependencies ++= Seq(
   "org.typelevel" %% "cats-core" % CatsVersion,
   // PureConfig
   "com.github.pureconfig" %% "pureconfig" % "0.11.0",   
+  // XML reading
+  "org.scala-lang.modules" %% "scala-xml" % "1.2.0",
   // Console handling
   "org.fusesource.jansi" % "jansi" % "1.17.1",
   "org.jline"            % "jline" % "3.10.0",
+  // Utility
+  "org.scalactic"  %% "scalactic"  % "3.0.8",
   // Testing
   "org.scalacheck" %% "scalacheck" % "1.13.4" % "test",
-  "org.scalatest"  %% "scalatest"  % "3.0.1"  % "test"
+  "org.scalatest"  %% "scalatest"  % "3.0.8"  % "test"
 )
 
 resolvers ++= Seq(

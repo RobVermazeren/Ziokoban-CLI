@@ -1,11 +1,22 @@
 package nl.itvanced.ziokoban
 
-import zio.ZIO
+import zio.{Has, Task, ZIO}
+import nl.itvanced.ziokoban.levels.LevelCollection
 
-package object levelsSource extends LevelsSource.Service[LevelsSource] {
-  final val levelsSourceService: ZIO[LevelsSource, Nothing, LevelsSource.Service[Any]] =
-    ZIO.access(_.levelsSource)
+package object levelsSource {
+  
+  type LevelsSource = Has[LevelsSource.Service]
 
-  final def loadLevel(id: String): ZIO[LevelsSource, Throwable, Option[Level]] =
-    ZIO.accessM(_.levelsSource loadLevel(id))
+  object LevelsSource {
+    trait Service {
+      def loadLevel(id: String): Task[Option[Level]] // RVNONE: Will be removed, after levelCollections are used.
+      def loadLevelCollection(): Task[LevelCollection]  
+    }
+
+    // Accessor methods
+    def loadLevel(id: String): ZIO[LevelsSource, Throwable, Option[Level]] =
+      ZIO.accessM[LevelsSource](_.get.loadLevel(id))
+    def loadLevelCollection(): ZIO[LevelsSource, Throwable, LevelCollection] =
+      ZIO.accessM[LevelsSource](_.get.loadLevelCollection())  
+  }
 }

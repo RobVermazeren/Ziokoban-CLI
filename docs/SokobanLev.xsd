@@ -1,0 +1,45 @@
+<?xml version="1.0"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+elementFormDefault="qualified">
+
+<xs:element name="SokobanLevels">
+  <xs:complexType>
+    <xs:sequence>
+      <xs:element name="Title" type="xs:string"/>
+      <xs:element name="Description" type="xs:string"/>
+      <xs:element name="Email" type="xs:string" minOccurs="0" maxOccurs="1"/>
+      <xs:element name="Url" type="xs:string" minOccurs="0" maxOccurs="1"/>
+      <xs:element name="LevelCollection" type="Collection_T"/>
+    </xs:sequence>
+    <xs:attribute name="xmlns:xsi" type="xs:string" default="http://www.w3.org/2001/XMLSchema-instance"/>
+    <xs:attribute name="xsi:schemaLocation" type="xs:string" default="SokobanLev.xsd"/>
+  </xs:complexType>
+</xs:element>
+
+<xs:complexType name="Collection_T">
+  <xs:sequence>
+    <xs:element name="Level" type="Level_T" minOccurs="1" maxOccurs="unbounded"/>
+  </xs:sequence>
+  <xs:attribute name="Copyright" type="xs:string" use="required"/>
+  <xs:attribute name="MaxWidth" type="xs:positiveInteger"/>
+  <xs:attribute name="MaxHeight" type="xs:positiveInteger"/>
+</xs:complexType>
+
+<xs:complexType name="Level_T">
+  <xs:sequence>
+    <xs:element name="L" type="Line_T" minOccurs="1" maxOccurs="unbounded"/>
+  </xs:sequence>
+  <xs:attribute name="Id" type="xs:string" use="required"/>
+  <xs:attribute name="Width" type="xs:positiveInteger"/>
+  <xs:attribute name="Height" type="xs:positiveInteger"/>
+  <xs:attribute name="Copyright" type="xs:string"/>
+</xs:complexType>
+
+<xs:simpleType name="Line_T">
+  <xs:restriction base="xs:string">
+    <xs:whiteSpace value="preserve"/>
+    <xs:pattern value="([ \.*$+@#])+"/>
+  </xs:restriction>
+</xs:simpleType>
+
+</xs:schema>

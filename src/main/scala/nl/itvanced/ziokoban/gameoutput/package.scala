@@ -1,21 +1,27 @@
 package nl.itvanced.ziokoban
 
-import nl.itvanced.ziokoban
-import zio.ZIO
+import zio.{Has, Task, ZIO}
 
-package object gameoutput extends GameOutput.Service[GameOutput] {
-  final val gameOutputService: ZIO[GameOutput, Nothing, GameOutput.Service[Any]] =
-    ZIO.access(_.gameOutput)
+package object gameoutput {
+  
+  type GameOutput = Has[GameOutput.Service]
 
-  final def drawGameState(state: GameState): ZIO[GameOutput, Throwable, Unit] =
-    ZIO.accessM(_.gameOutput drawGameState state)
+  object GameOutput {
+    trait Service {
+      def drawGameState(state: GameState): Task[Unit]
+      def preDrawing(state: GameState): Task[Unit]
+      def postDrawing(state: GameState): Task[Unit]
+      def println[A](text: A): Task[Unit]
+    }
 
-  final def preDrawing(state: GameState): ZIO[GameOutput, Throwable, Unit] =
-    ZIO.accessM(_.gameOutput preDrawing state)  
-
-  final def postDrawing(state: GameState): ZIO[GameOutput, Throwable, Unit] =
-    ZIO.accessM(_.gameOutput postDrawing state)  
-
-  final def println[A](text: A): ZIO[GameOutput, Throwable, Unit] =
-    ZIO.accessM(_.gameOutput println text)
+    // Accessor methods
+    def drawGameState(state: GameState): ZIO[GameOutput, Throwable, Unit] =
+      ZIO.accessM[GameOutput](_.get.drawGameState(state)) 
+    def preDrawing(state: GameState): ZIO[GameOutput, Throwable, Unit] =
+      ZIO.accessM[GameOutput](_.get.preDrawing(state)) 
+    def postDrawing(state: GameState): ZIO[GameOutput, Throwable, Unit] =
+      ZIO.accessM[GameOutput](_.get.postDrawing(state)) 
+    def println[A](text: A): ZIO[GameOutput, Throwable, Unit] =
+      ZIO.accessM[GameOutput](_.get.println(text)) 
+  }
 }

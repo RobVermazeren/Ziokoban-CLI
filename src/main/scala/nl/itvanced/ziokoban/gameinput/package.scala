@@ -1,11 +1,20 @@
 package nl.itvanced.ziokoban
 
-import zio.ZIO
+import zio.{Has, Task, ZIO}
+import nl.itvanced.ziokoban.GameCommands.GameCommand
 
-package object gameinput extends GameInput.Service[GameInput] {
-  final val gameInputService: ZIO[GameInput, Nothing, GameInput.Service[Any]] =
-    ZIO.access(_.gameInput)
+package object gameinput {
 
-  final val nextCommand: ZIO[GameInput, Nothing, Option[GameCommands.GameCommand]] =
-    ZIO.accessM(_.gameInput nextCommand())
+  type GameInput = Has[GameInput.Service]
+
+  object GameInput {
+    trait Service {
+      // Return the next command from the input. None if no command present.
+      def nextCommand(): Task[Option[GameCommand]]
+    }
+
+    // Accessor methods
+    def nextCommand(): ZIO[GameInput, Throwable, Option[GameCommand]] =
+      ZIO.accessM[GameInput](_.get.nextCommand())
+  }
 }

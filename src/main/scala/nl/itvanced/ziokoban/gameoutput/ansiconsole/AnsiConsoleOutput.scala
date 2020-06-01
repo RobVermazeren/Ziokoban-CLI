@@ -1,20 +1,27 @@
 package nl.itvanced.ziokoban.gameoutput.ansiconsole
 
+import zio.{Task, UIO, ZIO, ZLayer}
 import nl.itvanced.ziokoban.gameoutput.GameOutput
-import zio.UIO
 
-final case class AnsiConsoleOutput private (
-  config: Config
-) extends GameOutput {  
-  import nl.itvanced.ziokoban.GameState
-  import nl.itvanced.ziokoban.Model.Coord
-  import org.fusesource.jansi.{Ansi, AnsiConsole}
-  import zio.Task
+object AnsiConsoleOutput {
+  
+  def live(c: Config): ZLayer[Any, Throwable, GameOutput] = { // RVNOTE: Move to ZOI Config. This will become a val again.
+    ZLayer.succeed(
+      LiveService(c)
+    )
+  }
 
-  private val gameDrawing = GameDrawing(config.chars)
+  final case class LiveService private (
+    config: Config
+  ) extends GameOutput.Service {  
+    import nl.itvanced.ziokoban.GameState
+    import nl.itvanced.ziokoban.Model.Coord
+    import org.fusesource.jansi.{Ansi, AnsiConsole}
+    import zio.Task
 
-  val gameOutput: GameOutput.Service[Any] = new GameOutput.Service[Any] {
-      import ConsoleDrawing._
+    private val gameDrawing = GameDrawing(config.chars)
+
+    import ConsoleDrawing._
     /**
       * Draw game state in console
       */
@@ -60,8 +67,4 @@ final case class AnsiConsoleOutput private (
     /** Transform level position to screen position */
     private def toScreenCoord(c: Coord) = Coord(c.x + 3, c.y + 3)
   }
-}
-
-object AnsiConsoleOutput {
-  def apply(config: Config): UIO[AnsiConsoleOutput] = UIO(new AnsiConsoleOutput(config))
 }
