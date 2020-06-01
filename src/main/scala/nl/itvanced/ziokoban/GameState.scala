@@ -36,6 +36,12 @@ trait GameState {
 
 object GameState {
 
+  /**
+    * Return a initial game state for a level.
+    *
+    * @param sourceLevel Level to use.
+    * @return            An initial game state for sourceLevel.
+    */
   def startLevel(sourceLevel: Level) = new GameState {
      val level = sourceLevel
      val pusher = level.pusher
@@ -44,6 +50,12 @@ object GameState {
      val history = Nil
   }
 
+  /**
+    * Stop a game.
+    *
+    * @param gs Current game state.
+    * @return   Updated game state, representing the stopped game.
+    */
   def stopGame(gs: GameState) = new GameState {
     val level = gs.level
     val pusher = gs.pusher
@@ -52,6 +64,16 @@ object GameState {
     val history = gs.history
   } 
 
+  /**
+    * Apply a push to game state gs. 
+    * Pusher pushes agains 0 or more crates.
+    *
+    * @param gs                     Current game state.
+    * @param newPusherLocation      New location of the pusher.
+    * @param emptyLocationToPushTo  The empty location that being pushed to.
+    * @param d                      The direction of the push.
+    * @return                       Updatde game state.
+    */
   def applyPush(gs: GameState, newPusherLocation: Coord, emptyLocationToPushTo: Coord, d: Direction): GameState = {
     val newCrateLocations = if (newPusherLocation != emptyLocationToPushTo)  
          gs.crates - newPusherLocation + emptyLocationToPushTo
@@ -67,13 +89,19 @@ object GameState {
      }
   }
 
-  // Starting from gs, return the GameState that is the result of moving the pusher in direction d.
+  /**
+    * Apply a pusher move to the current game state.
+    *
+    * @param gs Current game state.
+    * @param d  The direction the pusher will move to.
+    * @return   Updated game state.
+    */
   def move(gs: GameState, d: Direction): GameState = {
     def isValidLocation(c: Coord): Boolean = gs.level.fields.contains(c)
     def hasCrate(c: Coord): Boolean = gs.crates.contains(c)
     def isEmpty(c: Coord): Boolean = isValidLocation(c) && !hasCrate(c)
 
-    val MaxPushableCrates = 1
+    val MaxPushableCrates = 1 // RVNATE: Move this somewhere else?
     val newPusherLocation = applyDirection(gs.pusher, d)
 
     searchEmptyTile(gs.crates, gs.emptyTiles, d)(gs.pusher, MaxPushableCrates) match {
@@ -82,6 +110,16 @@ object GameState {
     }
   }
  
+  /**
+    * Search for an empty tile to perform a move to.
+    *
+    * @param crates         The current set of crates.
+    * @param emptyTiles     The current set of empty tiles.
+    * @param d              The direction of the search.
+    * @param startLocation  Start location of the search.
+    * @param numberOfCrates Number of crates that may be pushed. 
+    * @return The first empty tile, starting from startLocation, working in given direction, that can be used for moving numberOfCrates tiles.
+    */
   @tailrec
   def searchEmptyTile(crates: Set[Coord], emptyTiles: Set[Coord], d: Direction)(startLocation: Coord, numberOfCrates: Int): Option[Coord] = {
     // numberOfCrates = 0, represents a move where no carts are pushed.

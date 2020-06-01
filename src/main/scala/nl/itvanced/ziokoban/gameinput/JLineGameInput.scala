@@ -35,7 +35,7 @@ object JLineGameInput {
     // Return next command, taken from Ref. Ref will contain None afterwards.
     final def nextCommand(): UIO[Option[GameCommand]] =
       for {
-       g <- queue.take.fork // Wait for next command on seperate fiber
+        g <- queue.take.fork // Wait for next command on seperate fiber // RVNOTE: Doesn't queue wait by itself?
         gc <- g.join
      } yield Some(gc)
   }
