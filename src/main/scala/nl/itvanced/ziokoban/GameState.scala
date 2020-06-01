@@ -2,6 +2,7 @@ package nl.itvanced.ziokoban
 
 import nl.itvanced.ziokoban.Model._
 import nl.itvanced.ziokoban.Model.Direction._
+import scala.annotation.tailrec
 
 case class GameStep(pusherLocation: Coord, crateLocations: Set[Coord], appliedDirection: Direction)
 
@@ -28,6 +29,9 @@ trait GameState {
 
   /** has this level ended? */
   def isFinished: Boolean = isSolved.isDefined
+
+  /** the empty locations */
+  def emptyTiles: Set[Coord] = level.fields -- crates - pusher
 }
 
 object GameState {
@@ -48,56 +52,51 @@ object GameState {
     val history = gs.history
   } 
 
-  def changePusherLocation(gs: GameState, newPusherLocation: Coord, d: Direction) = new GameState {
-    val level = gs.level
-    val pusher = newPusherLocation
-    val crates = gs.crates
-    val isSolved = None
-    val history = GameStep(gs.pusher, gs.crates, d) :: gs.history
-  }
-   
-  def changePusherAndCrateLocation(gs: GameState, newPusherLocation: Coord, newCrateLocation: Coord, d: Direction): GameState  = {
-    val newCrateLocations = gs.crates - newPusherLocation + newCrateLocation
+  def applyPush(gs: GameState, newPusherLocation: Coord, emptyLocationToPushTo: Coord, d: Direction): GameState = {
+    val newCrateLocations = if (newPusherLocation != emptyLocationToPushTo)  
+         gs.crates - newPusherLocation + emptyLocationToPushTo
+    else gs.crates
     val newIsSolved = if (newCrateLocations == gs.level.targets) Some(true) else None
 
-   new GameState {
-    val level = gs.level
-    val pusher = newPusherLocation
-    val crates = newCrateLocations
-    val isSolved = newIsSolved
-    val history = GameStep(gs.pusher, gs.crates, d) :: gs.history
-   }
+    new GameState {
+      val level = gs.level
+      val pusher = newPusherLocation
+      val crates = newCrateLocations
+      val isSolved = newIsSolved
+      val history = GameStep(gs.pusher, gs.crates, d) :: gs.history
+     }
   }
 
   // Starting from gs, return the GameState that is the result of moving the pusher in direction d.
   def move(gs: GameState, d: Direction): GameState = {
     def isValidLocation(c: Coord): Boolean = gs.level.fields.contains(c)
     def hasCrate(c: Coord): Boolean = gs.crates.contains(c)
+    def isEmpty(c: Coord): Boolean = isValidLocation(c) && !hasCrate(c)
 
+    val MaxPushableCrates = 1
     val newPusherLocation = applyDirection(gs.pusher, d)
-    if (isValidLocation(newPusherLocation)) {
-      if (!hasCrate(newPusherLocation)) 
-        // Move in given direction goes to empty location.
-        changePusherLocation(gs, newPusherLocation, d)
-      else {
-        // Move in given direction will hit a crate. Check if crate can be moved.
-        val newCrateLocation = applyDirection(newPusherLocation, d)
-        if (isValidLocation(newCrateLocation)) {
-          if (hasCrate(newCrateLocation)) 
-            // Move not possible: another crate is blocking this move.
-            gs
-          else 
-            // Crate can be moved
-            changePusherAndCrateLocation(gs, newPusherLocation, newCrateLocation, d) 
-        }
-        else 
-          // Move not possible: crate would go outside given gs locations.
-          gs
-      }
+
+    searchEmptyTile(gs.crates, gs.emptyTiles, d)(gs.pusher, MaxPushableCrates) match {
+      case Some(emptyTile) => applyPush(gs, newPusherLocation, emptyTile, d)
+      case None =>            gs
     }
-    else 
-      // Move not possible: new location is outside given gs locations.
-      gs
+  }
+ 
+  @tailrec
+  def searchEmptyTile(crates: Set[Coord], emptyTiles: Set[Coord], d: Direction)(startLocation: Coord, numberOfCrates: Int): Option[Coord] = {
+    // numberOfCrates = 0, represents a move where no carts are pushed.
+    if (numberOfCrates < 0) None
+    else {
+      val newLocation = applyDirection(startLocation, d)
+      if (emptyTiles.contains(newLocation))
+        Some(newLocation)
+      else if (!crates.contains(newLocation))
+        None
+      else 
+        searchEmptyTile(crates, emptyTiles, d)(newLocation, numberOfCrates - 1) 
+    }
+    
+        
   }
 
   /** Undo the last game step.
@@ -131,15 +130,16 @@ object GameState {
     case Up    => 'u'
   }
 
-  /** Return the Coord that results from moving from c into direction d.
+  /** Return the Coord that results from moving from c into direction d and taking s steps.
    *  @param c current position.
    *  @param d direction to apply.
+   *  @param s number of steps to apply. Defaults to 1.
    *  @return the new position.
    */
-  private def applyDirection(c: Coord, d: Direction): Coord = d match {
-    case Direction.Up    => Coord(c.x, c.y - 1)
-    case Direction.Right => Coord(c.x + 1, c.y)
-    case Direction.Down  => Coord(c.x, c.y + 1)
-    case Direction.Left  => Coord(c.x - 1, c.y)
+  private def applyDirection(c: Coord, d: Direction, s: Int = 1): Coord = d match {
+    case Direction.Up    => Coord(c.x, c.y - s)
+    case Direction.Right => Coord(c.x + s, c.y)
+    case Direction.Down  => Coord(c.x, c.y + s)
+    case Direction.Left  => Coord(c.x - s, c.y)
   }
 }
