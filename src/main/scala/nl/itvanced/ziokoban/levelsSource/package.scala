@@ -9,7 +9,7 @@ package object levelsSource {
 
   object LevelsSource {
     trait Service {
-      def loadLevel(id: String): Task[Option[Level]] // Will be removed
+      def loadLevel(id: String): Task[Option[Level]] // RVNONE: Will be removed, after levelCollections are used.
       def loadLevelCollection(): Task[LevelCollection]  
     }
 
