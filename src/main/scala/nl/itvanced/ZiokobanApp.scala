@@ -22,8 +22,9 @@ object ZiokobanApp extends App {
     * @return     Final ZIO returning an ExitCode and with all errors applied.
     */
   def run(args: List[String]): ZIO[ZEnv, Nothing, ExitCode] = {
-    program().exitCode
-    // RVNOTE: println for error code putStrLn(s"Execution failed with $err") *>
+    program()
+      .tapError(e => putStrLn(s"Execution failed with $e"))
+      .exitCode
   }
 
   def program(): ZIO[ZEnv, Throwable, Unit] = {
