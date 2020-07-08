@@ -7,18 +7,19 @@ import scala.util.{Failure, Success, Try}
 import nl.itvanced.ziokoban.levels.format.AsciiLevelFormat
 
 case class SlcSokobanLevels(
-  title: String,
-  description: String,
-  email: Option[String],
-  url: Option[String],
-  collection: SlcLevelCollection
+    title: String,
+    description: String,
+    email: Option[String],
+    url: Option[String],
+    collection: SlcLevelCollection
 )
 
 object SlcSokobanLevels {
+
   def toLevelCollection(sls: SlcSokobanLevels): Try[LevelCollection] = { // RVNOTE: Consider using Validated to collect all errors. (Nice output)
     val convertedLevels = sls.collection.levels.map(convert)
 
-    val failureIndices: List[Int] = convertedLevels.zipWithIndex.collect { case (Failure(e), i) => i } 
+    val failureIndices: List[Int] = convertedLevels.zipWithIndex.collect { case (Failure(e), i) => i }
     failureIndices match {
       case Nil => // No failures
         Success(
@@ -33,23 +34,24 @@ object SlcSokobanLevels {
     }
   }
 
-  private def convert(l: SlcLevel): Try[Level] = for {
-    levelMap <- AsciiLevelFormat.toLevelMap(l.lines)
-    level    <- Level.fromLevelMap(levelMap)
-  } yield level
+  private def convert(l: SlcLevel): Try[Level] =
+    for {
+      levelMap <- AsciiLevelFormat.toLevelMap(l.lines)
+      level    <- Level.fromLevelMap(levelMap)
+    } yield level
 }
 
 case class SlcLevelCollection(
-  copyright: String,
-  maxWidth: Option[Int],
-  maxHeight: Option[Int],
-  levels: List[SlcLevel]
+    copyright: String,
+    maxWidth: Option[Int],
+    maxHeight: Option[Int],
+    levels: List[SlcLevel]
 )
 
 case class SlcLevel(
-  id: String,
-  width: Option[Int],
-  height: Option[Int],
-  copyright: Option[String],
-  lines: List[String]
+    id: String,
+    width: Option[Int],
+    height: Option[Int],
+    copyright: Option[String],
+    lines: List[String]
 )

@@ -26,6 +26,7 @@ object HardcodedGameInput {
     MoveLeft,
     Quit
   )
+
   val definedCommands_1 = List(
     MoveUp,
     MoveRight,
@@ -54,9 +55,10 @@ object HardcodedGameInput {
     } yield new LiveService(q, r)
 
   final case class LiveService(
-    queue: Queue[GameCommand],
-    ref: Ref[Option[GameCommand]]
+      queue: Queue[GameCommand],
+      ref: Ref[Option[GameCommand]]
   ) extends GameInput.Service {
+
     // Return next command, taken from Ref. Ref will contain None afterwards.
     final def nextCommand(): UIO[Option[GameCommand]] =
       for {
@@ -78,9 +80,8 @@ object HardcodedGameInput {
         for {
           // Pass the next value from Queue to Ref.
           newCommand <- queue.poll
-          _ <- ref.set(newCommand)
+          _          <- ref.set(newCommand)
         } yield ()
     }
-  }.repeat(Schedule.spaced(Duration(500, TimeUnit.MILLISECONDS)))
-   .unit
+  }.repeat(Schedule.spaced(Duration(500, TimeUnit.MILLISECONDS))).unit
 }

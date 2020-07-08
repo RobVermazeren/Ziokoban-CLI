@@ -8,6 +8,7 @@ package object gameinput {
   type GameInput = Has[GameInput.Service]
 
   object GameInput {
+
     trait Service {
       // Return the next command from the input. None if no command present.
       def nextCommand(): Task[Option[GameCommand]]

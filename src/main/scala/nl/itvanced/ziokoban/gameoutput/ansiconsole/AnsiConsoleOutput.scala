@@ -4,7 +4,7 @@ import zio.{Task, UIO, ZIO, ZLayer}
 import nl.itvanced.ziokoban.gameoutput.GameOutput
 
 object AnsiConsoleOutput {
-  
+
   def live(c: Config): ZLayer[Any, Throwable, GameOutput] = { // RVNOTE: Move to ZOI Config. This will become a val again.
     ZLayer.succeed(
       LiveService(c)
@@ -12,8 +12,8 @@ object AnsiConsoleOutput {
   }
 
   final case class LiveService private (
-    config: Config
-  ) extends GameOutput.Service {  
+      config: Config
+  ) extends GameOutput.Service {
     import nl.itvanced.ziokoban.GameState
     import nl.itvanced.ziokoban.Model.Coord
     import org.fusesource.jansi.{Ansi, AnsiConsole}
@@ -22,6 +22,7 @@ object AnsiConsoleOutput {
     private val gameDrawing = GameDrawing(config.chars)
 
     import ConsoleDrawing._
+
     /**
       * Draw game state in console
       */
