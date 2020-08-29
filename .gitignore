@@ -22,4 +22,5 @@ src_managed/
 
 ### metals
 .metals/
+.vscode/
 metals.sbt
