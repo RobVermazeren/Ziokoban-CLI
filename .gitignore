@@ -22,4 +22,4 @@ src_managed/
 
 ### metals
 .metals/
-project/metals.sbt
+metals.sbt
