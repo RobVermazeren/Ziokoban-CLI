@@ -4,7 +4,9 @@ name := "ziokoban"
 
 version := "0.1.0"
 
-scalaVersion := "2.12.11"
+scalaVersion := "2.12.12"
+Global / scalaVersion := "2.12.12"
+ThisBuild / scalaVersion := "2.12.12"
 
 organization := "nl.itvanced"
 
@@ -20,7 +22,6 @@ scalacOptions ++= Seq(
   , "-Xverify"
   , "-feature"
   ,"-Ypartial-unification"
-  ,"-Ywarn-unused-imports"
   ,"-Xfatal-warnings"
   , "-language:_"
 )
@@ -28,15 +29,17 @@ scalacOptions ++= Seq(
 javacOptions ++= Seq("-Xlint:unchecked", "-Xlint:deprecation", "-source", "1.8", "-target", "1.8")
 
 val CatsVersion = "1.6.1"
-val ZIOVersion  = "1.0.0-RC21-2"
+val ZIOVersion  = "1.0.1"
+val ZIOConfigVersion  = "1.0.0-RC26"
 
 libraryDependencies ++= Seq(
   // ZIO
-  "dev.zio"       %% "zio" % ZIOVersion,
+  "dev.zio"       %% "zio"        % ZIOVersion,
+  "dev.zio"       %% "zio-config"          % ZIOConfigVersion,
+  "dev.zio"       %% "zio-config-refined"  % ZIOConfigVersion,
+  "dev.zio"       %% "zio-config-typesafe" % ZIOConfigVersion,
   // Cats 
   "org.typelevel" %% "cats-core" % CatsVersion,
-  // PureConfig
-  "com.github.pureconfig" %% "pureconfig" % "0.11.0",   
   // XML reading
   "org.scala-lang.modules" %% "scala-xml" % "1.2.0",
   // Console handling
