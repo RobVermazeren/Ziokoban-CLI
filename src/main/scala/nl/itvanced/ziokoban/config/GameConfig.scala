@@ -1,17 +1,25 @@
 package nl.itvanced.ziokoban.config
 
-import nl.itvanced.ziokoban.gameoutput.ansiconsole.{Config => GameOutputConfig}
+import nl.itvanced.ziokoban.gameoutput.ansiconsole.{Config => GameOutputConfig, CharConfig => GameOutputCharConfig}
 import zio.{Task, ZIO}
+import zio.config._, ConfigDescriptor._, ConfigSource._
+import zio.config.typesafe.TypesafeConfigSource._
+import zio.config.typesafe.TypesafeConfig
 
 case class GameConfig(
     gameOutput: GameOutputConfig
 )
 
 object GameConfig {
-  import pureconfig.generic.ProductHint
-  import pureconfig.generic.auto._
-  import pureconfig._
+  // Manual creation of config descriptor, in order to get better understanding of what is going on.
+  val gameOutputCharsConfigDescr = 
+    (string("pusherChar") |@| string("crateChar"))(GameOutputCharConfig.apply, GameOutputCharConfig.unapply) 
+  
+  val gameOutputConfigDescr = 
+    (nested("chars") {gameOutputCharsConfigDescr})(GameOutputConfig.apply, GameOutputConfig.unapply)
 
-  implicit def productHint[T]  = ProductHint[T](ConfigFieldMapping(CamelCase, CamelCase))
-  def load(): Task[GameConfig] = ZIO.effect[GameConfig](pureconfig.loadConfigOrThrow[GameConfig])
+  val gameConfigDescr =
+    (nested("gameOutput") {gameOutputConfigDescr})(GameConfig.apply, GameConfig.unapply) 
+
+  def asLayer = TypesafeConfig.fromDefaultLoader(gameConfigDescr) 
 }

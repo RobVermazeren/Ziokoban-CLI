@@ -14,6 +14,7 @@ object ZiokobanApp extends App {
   import nl.itvanced.ziokoban.config.GameConfig
   import nl.itvanced.ziokoban.gameoutput.ansiconsole.AnsiConsoleOutput
   import zio.ZIO
+  import zio.config.syntax._
 
   /**
     * Implementation of the run method from App.
@@ -28,18 +29,14 @@ object ZiokobanApp extends App {
   }
 
   def program(): ZIO[ZEnv, Throwable, Unit] = {
-    for {
-      c <- GameConfig.load() // RVNOTE: when config is a layer this method will be simpler. No for comprehension needed.
-      _ <- {
-        val gameInputLayer    = JLineGameInput.live
-        val gameOutputLayer   = AnsiConsoleOutput.live(c.gameOutput)
-        val levelsSourceLayer = ResourceLevelsSource.live
+    val config            = GameConfig.asLayer
+    val gameInputLayer    = JLineGameInput.live
+    val gameOutputLayer   = config.narrow(_.gameOutput) >>> AnsiConsoleOutput.live
+    val levelsSourceLayer = ResourceLevelsSource.live
 
-        val layers = gameInputLayer ++ gameOutputLayer ++ levelsSourceLayer
+    val layers = gameInputLayer ++ gameOutputLayer ++ levelsSourceLayer
 
-        makeProgram.provideSomeLayer[ZEnv](layers) // Provide all the required layers, except ZEnv.
-      }
-    } yield ()
+    makeProgram.provideSomeLayer[ZEnv](layers) // Provide all the required layers, except ZEnv.
   }
 
   val makeProgram: ZIO[GameOutput with GameInput with LevelsSource, Throwable, Unit] = {

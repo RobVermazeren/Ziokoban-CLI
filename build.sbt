@@ -43,8 +43,8 @@ libraryDependencies ++= Seq(
   // XML reading
   "org.scala-lang.modules" %% "scala-xml" % "1.2.0",
   // Console handling
-  "org.fusesource.jansi" % "jansi" % "1.17.1",
-  "org.jline"            % "jline" % "3.10.0",
+  "org.fusesource.jansi" % "jansi" % "1.18",
+  "org.jline"            % "jline" % "3.16.0",
   // Utility
   "org.scalactic"  %% "scalactic"  % "3.0.8",
   // Testing
@@ -53,7 +53,7 @@ libraryDependencies ++= Seq(
 )
 
 resolvers ++= Seq(
-  "Typesafe Snapshots"          at "http://repo.typesafe.com/typesafe/snapshots/",
+  "Typesafe Snapshots"          at "https://repo.typesafe.com/typesafe/snapshots/",
   "Secured Central Repository"  at "https://repo1.maven.org/maven2",
   Resolver.sonatypeRepo("snapshots")
 )

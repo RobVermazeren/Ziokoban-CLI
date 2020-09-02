@@ -2,16 +2,17 @@ package nl.itvanced.ziokoban.gameoutput.ansiconsole
 
 import zio.{Task, UIO, ZIO, ZLayer}
 import nl.itvanced.ziokoban.gameoutput.GameOutput
+import zio.Has
 
 object AnsiConsoleOutput {
 
-  def live(c: Config): ZLayer[Any, Throwable, GameOutput] = { // RVNOTE: Move to ZOI Config. This will become a val again.
-    ZLayer.succeed(
-      LiveService(c)
+  val live: ZLayer[Has[Config], Throwable, GameOutput] = { 
+    ZLayer.fromService(config =>
+      new LiveService(config)
     )
   }
 
-  final case class LiveService private (
+  final case class LiveService (
       config: Config
   ) extends GameOutput.Service {
     import nl.itvanced.ziokoban.GameState
