@@ -66,7 +66,7 @@ final case class GameDrawing(config: CharConfig) {
     *  @return The ConsoleDrawState that will draw the dynamic parts of given game state of a level.
     */
   def drawDynamic(levelToScreenPosition: Coord => Coord)(gs: GameState): ConsoleDrawState[Unit] = {
-    gs.level.fields.foldLeft(State.pure(Unit): ConsoleDrawState[Unit]) {
+    gs.level.fields.foldLeft(State.pure(()): ConsoleDrawState[Unit]) {
       case (state, coord) =>
         val occupant =
           if (gs.pusher == coord) Pusher

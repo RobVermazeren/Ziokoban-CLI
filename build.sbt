@@ -4,13 +4,13 @@ name := "ziokoban"
 
 version := "0.1.0"
 
-scalaVersion := "2.12.12"
-Global / scalaVersion := "2.12.12"
-ThisBuild / scalaVersion := "2.12.12"
+scalaVersion := "2.13.3"
+Global / scalaVersion := "2.13.3"
+ThisBuild / scalaVersion := "2.13.3" 
 
 organization := "nl.itvanced"
 
-addCompilerPlugin("org.spire-math" %% "kind-projector" % "0.9.9")
+addCompilerPlugin("org.typelevel" %% "kind-projector" % "0.11.0" cross CrossVersion.full)
 
 enablePlugins(JavaAppPackaging)
 
@@ -21,14 +21,14 @@ scalacOptions ++= Seq(
   , "-Xlint:-unused"
   , "-Xverify"
   , "-feature"
-  ,"-Ypartial-unification"
+ // ,"-Ypartial-unification"
   ,"-Xfatal-warnings"
   , "-language:_"
 )
 
 javacOptions ++= Seq("-Xlint:unchecked", "-Xlint:deprecation", "-source", "1.8", "-target", "1.8")
 
-val CatsVersion = "1.6.1"
+val CatsVersion = "2.0.0"
 val ZIOVersion  = "1.0.1"
 val ZIOConfigVersion  = "1.0.0-RC26"
 
@@ -43,12 +43,12 @@ libraryDependencies ++= Seq(
   // XML reading
   "org.scala-lang.modules" %% "scala-xml" % "1.2.0",
   // Console handling
-  "org.fusesource.jansi" % "jansi" % "1.18",
-  "org.jline"            % "jline" % "3.16.0",
+  "org.fusesource.jansi" % "jansi" % "1.17.1", // "1.18",
+  "org.jline"            % "jline" % "3.10.0",  //  "3.16.0",
   // Utility
   "org.scalactic"  %% "scalactic"  % "3.0.8",
   // Testing
-  "org.scalacheck" %% "scalacheck" % "1.13.4" % "test",
+  "org.scalacheck" %% "scalacheck" % "1.14.1" % "test",
   "org.scalatest"  %% "scalatest"  % "3.0.8"  % "test"
 )
 

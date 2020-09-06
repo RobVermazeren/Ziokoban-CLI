@@ -39,7 +39,7 @@ object ResourceLevelsSource {
 
     private def loadResource(resourcePath: String): Try[List[String]] =
       Try {
-        Source.fromResource(resourcePath).getLines.toList
+        Source.fromResource(resourcePath).getLines().toList
       }
 
     private def toLevel(lines: List[String]): Option[Level] =

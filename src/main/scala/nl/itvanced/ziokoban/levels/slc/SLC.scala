@@ -21,7 +21,7 @@ object SLC {
       val description = (node \ "Description").text
       if (description.trim.isEmpty) throw new Exception("SlcSokobanLevels must contain a Decription")
       val trimmedDescription = {
-        val trimmedLines = description.lines.toList.map(_.trim)
+        val trimmedLines = description.linesIterator.toList.map(_.trim)
         val relevantLines =
           trimmedLines
             .dropWhile(_.isEmpty())
