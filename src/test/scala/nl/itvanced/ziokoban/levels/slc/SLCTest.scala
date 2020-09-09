@@ -104,7 +104,7 @@ class SLCTest extends FreeSpec with Matchers {
         copyright: Option[String] = Some("copyright 1"),
         maxHeight: Option[Int] = Some(8),
         maxWidth: Option[Int] = Some(15),
-        levels: () => List[List[String]] = () => List(defaultLevel)
+        levels: () => List[List[String]] = () => List(defaultLevel())
     ): List[String] = {
       val copyrightString = attributeString(copyright, "Copyright")
       val maxHeightString = attributeString(maxHeight, "MaxHeight")
