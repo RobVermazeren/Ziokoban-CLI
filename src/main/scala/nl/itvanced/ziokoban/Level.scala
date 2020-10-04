@@ -1,13 +1,11 @@
 package nl.itvanced.ziokoban
 
 import nl.itvanced.ziokoban.Model._
+import nl.itvanced.ziokoban.levels.{LevelFieldMap, LevelMap}
 import scala.util.Try
-import scala.util.Success
-import scala.util.Failure
 
 /** Trait representing a Sokoban level. */
 trait Level {
-  import nl.itvanced.ziokoban.levels.LevelMap.LevelMap
 
   /** the source LevelMap */
   def map: LevelMap
@@ -50,28 +48,25 @@ trait Level {
 }
 
 object Level {
-  import nl.itvanced.ziokoban.levels.LevelMap
-  import nl.itvanced.ziokoban.levels.LevelMap._
 
   /** Create a level for this map.
     *  @param levelMap map of level to be created.
     *  @return Some containing Level if levelMap represents a valid level, None otherwise.
     */
   def fromLevelMap(levelMap: LevelMap): Try[Level] = {
-    val fields = levelMap.filter {
-      case (_, Field(_, _)) => true
-      case _                => false
+    val fieldMap: LevelFieldMap = levelMap.collect {
+      case (c, f@Field(_, _)) => c -> f
     }
     val wallLocations = levelMap.filter {
       case (_, Wall) => true
       case _         => false
     }.keySet
     for {
-      pusherLocation <- getPusherLocation(fields)
-      crateLocations  = getCrateLocations(fields)
-      targetLocations = getTargetLocations(fields)
+      pusherLocation <- LevelMap.getPusherLocation(fieldMap)
+      crateLocations  = LevelMap.getCrateLocations(fieldMap)
+      targetLocations = LevelMap.getTargetLocations(fieldMap)
       if (crateLocations.size == targetLocations.size)
-      reachableFields = LevelMap.reachableFields(levelMap, pusherLocation)
+      reachableFields = LevelMap.reachableFields(fieldMap, pusherLocation)
       if (crateLocations subsetOf reachableFields)
       if (targetLocations subsetOf reachableFields)
     } yield new Level {
@@ -82,43 +77,5 @@ object Level {
       val crates: Set[Coord]  = crateLocations
       val targets: Set[Coord] = targetLocations
     }
-  }
-
-  /** Return the pusher location.
-    *  Only valid if map contains exactly one pusher.
-    *  @param map the source LevelMap.
-    *  @return The pusher location, if valid.
-    */
-  private def getPusherLocation(map: LevelMap): Try[Coord] = {
-    map
-      .filter {
-        case (_, tile) => isFieldWithOccupant(tile, Pusher)
-      }
-      .keySet
-      .toList match { // There must be exactly one pusher on a level.
-      case h :: Nil => Success(h)
-      case _        => Failure(new Exception("Level should contain exactly one pusher."))
-    }
-  }
-
-  /** Return all crate locations.
-    *  @param map the source LevelMap.
-    *  @return A Set of all crate locations.
-    */
-  private def getCrateLocations(map: LevelMap): Set[Coord] = {
-    map.filter {
-      case (_, tile) => isFieldWithOccupant(tile, Crate)
-    }.keySet
-  }
-
-  /** Return all target locations.
-    *  @param map the source LevelMap.
-    *  @return A Set of all target locations.
-    */
-  private def getTargetLocations(map: LevelMap): Set[Coord] = {
-    map.filter {
-      case (_, Field(_, true)) => true
-      case _                   => false
-    }.keySet
   }
 }
