@@ -4,7 +4,7 @@ import org.scalatest._
 import org.scalatest.TryValues._
 import java.awt.event.KeyListener
 
-class SLCTest extends FreeSpec with Matchers {
+class SLCSpec extends FreeSpec with Matchers {
 
   object TestCases {
 
