@@ -32,7 +32,7 @@ final case class GameDrawing(config: CharConfig) {
   private def colorFor(o: Occupant): Color =
     o match {
       case Pusher => Color(BaseColor.Black, !Color.IsBright)
-      case Crate  => Color(BaseColor.Magenta, !Color.IsBright)
+      case Crate  => Color(BaseColor.Black, !Color.IsBright)
       case Empty  => Color(BaseColor.White, Color.IsBright)
     }
 
