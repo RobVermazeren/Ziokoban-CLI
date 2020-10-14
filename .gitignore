@@ -24,3 +24,6 @@ src_managed/
 .metals/
 .vscode/
 metals.sbt
+
+### This project
+levels/*
