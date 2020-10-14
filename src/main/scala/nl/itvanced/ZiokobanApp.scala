@@ -41,7 +41,6 @@ object ZiokobanApp extends App {
 
   val makeProgram: ZIO[GameOutput with GameInput with LevelsSource, Throwable, Unit] = {
     for {
-      // l <- LevelsSource.loadLevel("levels/test.sok")
       l <- LevelsSource.loadLevelCollection().map(_.levels.headOption) 
       _ <- l match {
         case None =>

@@ -18,7 +18,6 @@ object SlcSokobanLevels {
 
   def toLevelCollection(sls: SlcSokobanLevels): Try[LevelCollection] = { // RVNOTE: Consider using Validated to collect all errors. (Nice output)
     val convertedLevels = sls.collection.levels.map(convert)
-    println("RV 1") // RVNOTE: remove 
     val failureIndices: List[Int] = convertedLevels.zipWithIndex.collect { case (Failure(e), i) => i }
     failureIndices match {
       case Nil => // No failures
