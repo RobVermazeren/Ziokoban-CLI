@@ -21,5 +21,9 @@ object GameConfig {
   val gameConfigDescr =
     (nested("gameOutput") {gameOutputConfigDescr})(GameConfig.apply, GameConfig.unapply) 
 
-  def asLayer = TypesafeConfig.fromDefaultLoader(gameConfigDescr) 
+  def asLayer = {
+    TypesafeConfig.fromHoconFile(new java.io.File("./ziokoban.conf"), gameConfigDescr) <> // = orElse
+    TypesafeConfig.fromDefaultLoader(gameConfigDescr)
+
+  }
 }
