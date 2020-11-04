@@ -1,5 +1,5 @@
 import sbt._
-
+// scalafmt: { align.preset = most, danglingParentheses.preset = false }
 name := "ziokoban"
 
 version := "0.1.0"
@@ -34,7 +34,7 @@ val ZIOConfigVersion  = "1.0.0-RC26"
 
 libraryDependencies ++= Seq(
   // ZIO
-  "dev.zio"       %% "zio"        % ZIOVersion,
+  "dev.zio"       %% "zio"                 % ZIOVersion,
   "dev.zio"       %% "zio-config"          % ZIOConfigVersion,
   "dev.zio"       %% "zio-config-refined"  % ZIOConfigVersion,
   "dev.zio"       %% "zio-config-typesafe" % ZIOConfigVersion,
@@ -44,14 +44,14 @@ libraryDependencies ++= Seq(
   "org.scala-lang.modules" %% "scala-xml" % "1.2.0",
   // Console handling
   "org.fusesource.jansi" % "jansi" % "1.17.1", // "1.18",
-  "org.jline"            % "jline" % "3.10.0",  //  "3.16.0",
+  "org.jline"            % "jline" % "3.10.0", //  "3.16.0",
   // Utility
   "org.scalactic"  %% "scalactic"  % "3.0.8",
   // Testing
   "dev.zio"        %% "zio-test"     % ZIOVersion % "test",
   "dev.zio"        %% "zio-test-sbt" % ZIOVersion % "test",
-  "org.scalacheck" %% "scalacheck" % "1.14.1" % "test",
-  "org.scalatest"  %% "scalatest"  % "3.0.8"  % "test"
+  "org.scalacheck" %% "scalacheck"   % "1.14.1"   % "test",
+  "org.scalatest"  %% "scalatest"    % "3.0.8"    % "test"
 )
 
 testFrameworks += new TestFramework("zio.test.sbt.ZTestFramework")

@@ -17,16 +17,15 @@ object ZiokobanApp extends App {
   import zio.config.syntax._
 
   /**
-    * Implementation of the run method from App.
-    *
-    * @param args Command line arguments.
-    * @return     Final ZIO returning an ExitCode and with all errors applied.
-    */
-  def run(args: List[String]): ZIO[ZEnv, Nothing, ExitCode] = {
+   * Implementation of the run method from App.
+   *
+   * @param args Command line arguments.
+   * @return     Final ZIO returning an ExitCode and with all errors applied.
+   */
+  def run(args: List[String]): ZIO[ZEnv, Nothing, ExitCode] =
     program()
       .tapError(e => putStrLn(s"Execution failed with $e"))
       .exitCode
-  }
 
   def program(): ZIO[ZEnv, Throwable, Unit] = {
     val config            = GameConfig.asLayer
@@ -41,7 +40,7 @@ object ZiokobanApp extends App {
 
   val makeProgram: ZIO[GameOutput with GameInput with LevelsSource, Throwable, Unit] = {
     for {
-      l <- LevelsSource.loadLevelCollection().map(_.levels.headOption) 
+      l <- LevelsSource.loadLevelCollection().map(_.levels.headOption)
       _ <- l match {
         case None =>
           GameOutput.println("This is not a valid level")
@@ -74,7 +73,7 @@ object ZiokobanApp extends App {
   }
 
   private def gameLoop(
-      gs: GameState
+    gs: GameState
   ): ZIO[GameOutput with GameInput, Throwable, GameState] =
     for {
       c <- GameInput.nextCommand()
@@ -84,18 +83,16 @@ object ZiokobanApp extends App {
 
   private def processCommand(gc: GameCommand, gs: GameState): ZIO[GameOutput, Throwable, GameState] =
     gc match {
-      case mc: MoveCommand => {
+      case mc: MoveCommand =>
         val newGameState = GameState.move(gs, moveCommand2Direction(mc))
         for {
           _ <- GameOutput.drawGameState(newGameState)
         } yield newGameState
-      }
-      case Undo => {
+      case Undo =>
         val newGameState = GameState.undo(gs)
         for {
           _ <- GameOutput.drawGameState(newGameState)
         } yield newGameState
-      }
       case Quit => ZIO.effectTotal[GameState](GameState.stopGame(gs))
       case Noop =>
         ZIO.effectTotal[GameState](gs) // RVNOTE: wait for a moment?
@@ -108,4 +105,5 @@ object ZiokobanApp extends App {
       case MoveDown  => Direction.Down
       case MoveLeft  => Direction.Left
     }
+
 }

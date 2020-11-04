@@ -14,27 +14,24 @@ import zio.blocking.Blocking
 object JLineGameInput {
   import GameCommands._
 
-  val live: ZLayer[Clock, Throwable, GameInput] = {
+  val live: ZLayer[Clock, Throwable, GameInput] =
     ZLayer.fromEffect(
       newLiveService()
     )
-  }
 
   // Create a JLineGameInput instance with a queue containing the given commands, feeded from JLine NonBlockingReader.
-  def newLiveService(): ZIO[Clock, Throwable, GameInput.Service] = {
+  def newLiveService(): ZIO[Clock, Throwable, GameInput.Service] =
     for {
       q   <- Queue.bounded[GameCommand](100)
       nbr <- ZIO.effect[NonBlockingReader](createReader()) // Can throw exception, so Throwable error type.
-      _ <-
-        handleJLineInput(
-          q,
-          nbr
-        ).fork // start process that reads keys from JLine terminal and pushes these as GameCommands to Queue.
+      _ <- handleJLineInput(
+        q,
+        nbr
+      ).fork // start process that reads keys from JLine terminal and pushes these as GameCommands to Queue.
     } yield LiveService(q)
-  }
 
   final case class LiveService private (
-      queue: Queue[GameCommand]
+    queue: Queue[GameCommand]
   ) extends GameInput.Service {
 
     // Return next command, taken from Ref. Ref will contain None afterwards.
@@ -43,11 +40,12 @@ object JLineGameInput {
         g  <- queue.take.fork // Wait for next command on seperate fiber // RVNOTE: Doesn't queue wait by itself?
         gc <- g.join
       } yield Some(gc)
+
   }
 
   private def handleJLineInput(
-      queue: Queue[GameCommand],
-      reader: NonBlockingReader
+    queue: Queue[GameCommand],
+    reader: NonBlockingReader
   ): ZIO[Clock, Nothing, Unit] = {
     for {
       e <-

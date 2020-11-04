@@ -39,11 +39,10 @@ object HardcodedGameInput {
     Quit
   )
 
-  val live: ZLayer[Clock, Nothing, GameInput] = {
+  val live: ZLayer[Clock, Nothing, GameInput] =
     ZLayer.fromEffect(
       newLiveService(definedCommands)
     )
-  }
 
   // Create a HardcodedGameInput instance with a queue containing the given commands. Empty Ref provided.
   def newLiveService(commands: List[GameCommand]): ZIO[Clock, Nothing, GameInput.Service] =
@@ -55,8 +54,8 @@ object HardcodedGameInput {
     } yield new LiveService(q, r)
 
   final case class LiveService(
-      queue: Queue[GameCommand],
-      ref: Ref[Option[GameCommand]]
+    queue: Queue[GameCommand],
+    ref: Ref[Option[GameCommand]]
   ) extends GameInput.Service {
 
     // Return next command, taken from Ref. Ref will contain None afterwards.
@@ -64,12 +63,13 @@ object HardcodedGameInput {
       for {
         gc <- ref.modify(c => (c, None))
       } yield gc
+
   }
 
   // Define a process that will fill Ref from Queue until it is empty. Only fill Ref if empty.
   private def processQueue(
-      ref: Ref[Option[GameCommand]],
-      queue: Queue[GameCommand]
+    ref: Ref[Option[GameCommand]],
+    queue: Queue[GameCommand]
   ): ZIO[Clock, Nothing, Unit] = {
     ref.get flatMap {
       case Some(_) =>
@@ -84,4 +84,5 @@ object HardcodedGameInput {
         } yield ()
     }
   }.repeat(Schedule.spaced(Duration(500, TimeUnit.MILLISECONDS))).unit
+
 }

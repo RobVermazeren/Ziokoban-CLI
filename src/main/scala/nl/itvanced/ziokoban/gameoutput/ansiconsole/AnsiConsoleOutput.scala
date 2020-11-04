@@ -6,14 +6,11 @@ import zio.Has
 
 object AnsiConsoleOutput {
 
-  val live: ZLayer[Has[Config], Throwable, GameOutput] = { 
-    ZLayer.fromService(config =>
-      new LiveService(config)
-    )
-  }
+  val live: ZLayer[Has[Config], Throwable, GameOutput] =
+    ZLayer.fromService(config => new LiveService(config))
 
-  final case class LiveService (
-      config: Config
+  final case class LiveService(
+    config: Config
   ) extends GameOutput.Service {
     import nl.itvanced.ziokoban.GameState
     import nl.itvanced.ziokoban.Model.Coord
@@ -25,8 +22,8 @@ object AnsiConsoleOutput {
     import ConsoleDrawing._
 
     /**
-      * Draw game state in console
-      */
+     * Draw game state in console
+     */
     final def drawGameState(state: GameState): Task[Unit] = {
       val drawing: ConsoleDrawState[Unit] = for {
         _ <- gameDrawing.drawDynamic(toScreenCoord)(state)
@@ -60,13 +57,13 @@ object AnsiConsoleOutput {
     }
 
     /**
-      * Print a text to the console and move to next line
-      */
-    final def println[A](text: A): Task[Unit] = {
+     * Print a text to the console and move to next line
+     */
+    final def println[A](text: A): Task[Unit] =
       Task.effect(AnsiConsole.out.println(text))
-    }
 
     /** Transform level position to screen position */
     private def toScreenCoord(c: Coord) = Coord(c.x + 3, c.y + 3)
   }
+
 }

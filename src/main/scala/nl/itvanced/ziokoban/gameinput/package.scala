@@ -17,5 +17,7 @@ package object gameinput {
     // Accessor methods
     def nextCommand(): ZIO[GameInput, Throwable, Option[GameCommand]] =
       ZIO.accessM[GameInput](_.get.nextCommand())
+
   }
+
 }

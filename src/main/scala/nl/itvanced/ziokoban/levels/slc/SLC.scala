@@ -79,9 +79,8 @@ object SLC {
         case Nil => Success(successes)
         case fs  => Failure(new Exception(s"Error reading Levels: ${allErrorMessages(fs)}"))
       }
-    } else {
+    } else
       Failure(new Exception("No levels in collection"))
-    }
   }
 
   def levelFromXML(node: Node): Try[SlcLevel] =

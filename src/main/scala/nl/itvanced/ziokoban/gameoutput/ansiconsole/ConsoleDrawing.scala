@@ -44,13 +44,13 @@ object ConsoleDrawing {
   }
 
   object Draw {
-    def eraseScreen: ConsoleDrawState[Unit]           = State.modify { _.eraseScreen() }
-    def saveCursorPosition: ConsoleDrawState[Unit]    = State.modify { _.saveCursorPosition() }
-    def restoreCursorPosition: ConsoleDrawState[Unit] = State.modify { _.restoreCursorPosition() }
+    def eraseScreen: ConsoleDrawState[Unit]           = State.modify(_.eraseScreen())
+    def saveCursorPosition: ConsoleDrawState[Unit]    = State.modify(_.saveCursorPosition())
+    def restoreCursorPosition: ConsoleDrawState[Unit] = State.modify(_.restoreCursorPosition())
 
-    def cursorToPosition(row: Int, column: Int): ConsoleDrawState[Unit] = State.modify { _.cursor(row, column) }
-    def hideCursor: ConsoleDrawState[Unit]                              = State.modify { _.format("\u001B[?25l") }
-    def showCursor: ConsoleDrawState[Unit]                              = State.modify { _.format("\u001B[?25h") }
+    def cursorToPosition(row: Int, column: Int): ConsoleDrawState[Unit] = State.modify(_.cursor(row, column))
+    def hideCursor: ConsoleDrawState[Unit]                              = State.modify(_.format("\u001B[?25l"))
+    def showCursor: ConsoleDrawState[Unit]                              = State.modify(_.format("\u001B[?25h"))
 
     def drawBorder(x0: Int, y0: Int, width: Int, height: Int): ConsoleDrawState[Unit] =
       State.modify { ansi =>
@@ -89,6 +89,8 @@ object ConsoleDrawing {
             rAnsi.cursor(pos.y, pos.x).a(c)
         }
       }
-    def drawAttribute(attribute: Attribute): ConsoleDrawState[Unit] = State.modify { _.a(attribute) }
+
+    def drawAttribute(attribute: Attribute): ConsoleDrawState[Unit] = State.modify(_.a(attribute))
   }
+
 }

@@ -11,15 +11,14 @@ import nl.itvanced.ziokoban.levels.slc.SlcSokobanLevels
 
 object ResourceLevelsSource {
 
-  val live: ZLayer[Any, Throwable, LevelsSource] = {
+  val live: ZLayer[Any, Throwable, LevelsSource] =
     ZLayer.succeed(
       LiveService()
     )
-  }
 
   case class LiveService() extends LevelsSource.Service {
 
-    final def loadLevel(id: String): Task[Option[Level]] = {
+    final def loadLevel(id: String): Task[Option[Level]] =
       loadResource(id) match {
         case Failure(_: java.io.FileNotFoundException) => // File not found is valid outcome, being translated to None
           Task.effect(None)
@@ -27,7 +26,6 @@ object ResourceLevelsSource {
         case t @ _ =>
           Task.fromTry(t).map(toLevel(_))
       }
-    }
 
     final def loadLevelCollection(): Task[LevelCollection] = {
       val t = (for {
@@ -44,5 +42,7 @@ object ResourceLevelsSource {
 
     private def toLevel(lines: List[String]): Option[Level] =
       AsciiLevelFormat.toLevelMap(lines).flatMap(Level.fromLevelMap(_)).toOption
+
   }
+
 }

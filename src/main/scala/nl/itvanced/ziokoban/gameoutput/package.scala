@@ -27,5 +27,7 @@ package object gameoutput {
 
     def println[A](text: A): ZIO[GameOutput, Throwable, Unit] =
       ZIO.accessM[GameOutput](_.get.println(text))
+
   }
+
 }

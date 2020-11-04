@@ -35,4 +35,5 @@ object AsciiLevelFormat {
       case ' ' | '-' | '_' => Some(Field(Empty, false))
       case _               => None // Illegal character detected.
     }
+
 }

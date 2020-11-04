@@ -25,37 +25,41 @@ trait Level {
   /** walls on this map */
   def walls: Set[Coord]
 
-  /** @param c location.
-    *  @return 'true' if location c on this map contains a wall.
-    */
+  /**
+   * @param c location.
+   *  @return 'true' if location c on this map contains a wall.
+   */
   def isWall(c: Coord): Boolean = walls.contains(c)
 
   /** initial locations of all crates on this map */
   def crates: Set[Coord]
 
-  /** @param c location.
-    *  @return 'true' if location c on this map contains a crate.
-    */
+  /**
+   * @param c location.
+   *  @return 'true' if location c on this map contains a crate.
+   */
   def hasCrate(c: Coord): Boolean = crates.contains(c)
 
   /** targets on this map */
   def targets: Set[Coord]
 
-  /** @param c location.
-    *  @return 'true' if location c on this map is a target.
-    */
+  /**
+   * @param c location.
+   *  @return 'true' if location c on this map is a target.
+   */
   def isTarget(c: Coord): Boolean = targets.contains(c)
 }
 
 object Level {
 
-  /** Create a level for this map.
-    *  @param levelMap map of level to be created.
-    *  @return Some containing Level if levelMap represents a valid level, None otherwise.
-    */
+  /**
+   * Create a level for this map.
+   *  @param levelMap map of level to be created.
+   *  @return Some containing Level if levelMap represents a valid level, None otherwise.
+   */
   def fromLevelMap(levelMap: LevelMap): Try[Level] = {
     val fieldMap: LevelFieldMap = levelMap.collect {
-      case (c, f@Field(_, _)) => c -> f
+      case (c, f @ Field(_, _)) => c -> f
     }
     val wallLocations = levelMap.filter {
       case (_, Wall) => true
@@ -78,4 +82,5 @@ object Level {
       val targets: Set[Coord] = targetLocations
     }
   }
+
 }

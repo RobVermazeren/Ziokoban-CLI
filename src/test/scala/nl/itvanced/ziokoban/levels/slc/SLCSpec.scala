@@ -30,7 +30,7 @@ class SLCSpec extends FreeSpec with Matchers {
     //    </LevelCollection>
     // </SokobanLevels>
 
-    private def sokobanLevels(content: List[String]): List[String] = {
+    private def sokobanLevels(content: List[String]): List[String] =
       List(
         """<?xml version="1.0" encoding="ISO-8859-1"?>""",
         """<SokobanLevels xsi:schemaLocation="SokobanLev.xsd" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">"""
@@ -39,9 +39,8 @@ class SLCSpec extends FreeSpec with Matchers {
         List(
           """</SokobanLevels>"""
         )
-    }
 
-    def defaultLevelCollection(): List[String] = {
+    def defaultLevelCollection(): List[String] =
       List(
         """<LevelCollection Copyright="copyright 1" MaxWidth="15" MaxHeight="8">"""
       ) ++
@@ -49,9 +48,8 @@ class SLCSpec extends FreeSpec with Matchers {
         List(
           """</LevelCollection>"""
         )
-    }
 
-    def defaultLevel(): List[String] = {
+    def defaultLevel(): List[String] =
       List(
         """<Level Id="Example 1" Width="15" Height="8" Copyright="copyright 2">"""
       ) ++
@@ -59,9 +57,8 @@ class SLCSpec extends FreeSpec with Matchers {
         List(
           """</Level>"""
         )
-    }
 
-    def defaultLines(): List[String] = {
+    def defaultLines(): List[String] =
       List(
         """<L>    #####</L>""",
         """<L>    #@  #</L>""",
@@ -69,22 +66,19 @@ class SLCSpec extends FreeSpec with Matchers {
         """<L>    #  .#</L>""",
         """<L>    #####</L>"""
       )
-    }
 
-    private def attributeString[A](value: Option[A], argumentName: String): String = {
+    private def attributeString[A](value: Option[A], argumentName: String): String =
       value.map(v => s""" $argumentName="$v"""").getOrElse("")
-    }
 
-    private def tagLines[A](value: Option[A], tagName: String): List[String] = {
+    private def tagLines[A](value: Option[A], tagName: String): List[String] =
       value.map(v => s"""<$tagName>$v</$tagName>""").toList
-    }
 
     def level(
-        id: Option[String] = Some("Example 1"),
-        copyright: Option[String] = Some("copyright 2"),
-        height: Option[Int] = Some(8),
-        width: Option[Int] = Some(15),
-        lines: () => List[String] = defaultLines
+      id: Option[String] = Some("Example 1"),
+      copyright: Option[String] = Some("copyright 2"),
+      height: Option[Int] = Some(8),
+      width: Option[Int] = Some(15),
+      lines: () => List[String] = defaultLines
     ): List[String] = {
       val idString        = attributeString(id, "Id")
       val copyrightString = attributeString(copyright, "Copyright")
@@ -101,10 +95,10 @@ class SLCSpec extends FreeSpec with Matchers {
     }
 
     def levelCollection(
-        copyright: Option[String] = Some("copyright 1"),
-        maxHeight: Option[Int] = Some(8),
-        maxWidth: Option[Int] = Some(15),
-        levels: () => List[List[String]] = () => List(defaultLevel())
+      copyright: Option[String] = Some("copyright 1"),
+      maxHeight: Option[Int] = Some(8),
+      maxWidth: Option[Int] = Some(15),
+      levels: () => List[List[String]] = () => List(defaultLevel())
     ): List[String] = {
       val copyrightString = attributeString(copyright, "Copyright")
       val maxHeightString = attributeString(maxHeight, "MaxHeight")
@@ -119,11 +113,11 @@ class SLCSpec extends FreeSpec with Matchers {
     }
 
     def create(
-        title: Option[String] = Some("Title-1"),
-        description: Option[String] = Some("Description 123."),
-        email: Option[String] = Some("mail@home.com"),
-        url: Option[String] = Some("""http://www.domain.com"""),
-        levelCollection: () => List[String] = defaultLevelCollection
+      title: Option[String] = Some("Title-1"),
+      description: Option[String] = Some("Description 123."),
+      email: Option[String] = Some("mail@home.com"),
+      url: Option[String] = Some("""http://www.domain.com"""),
+      levelCollection: () => List[String] = defaultLevelCollection
     ): String = {
       val titleLines: List[String] = tagLines(title, "Title")
       val descriptionLines: List[String] = description
@@ -176,6 +170,7 @@ class SLCSpec extends FreeSpec with Matchers {
         () => levelCollection(levels = () => List(level(lines = () => Nil)))
       )
     )
+
   }
 
   "SLC.loadFromString" - {

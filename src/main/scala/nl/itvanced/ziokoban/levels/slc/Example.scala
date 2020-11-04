@@ -2,10 +2,10 @@ package nl.itvanced.ziokoban.levels.slc
 
 object Example {
 
-  lazy val original: String = originalRaw.dropWhile(_ != '<') 
+  lazy val original: String = originalRaw.dropWhile(_ != '<')
 
-  private val originalRaw: String = 
-  """
+  private val originalRaw: String =
+    """
 <?xml version="1.0" encoding="utf-8"?>
 <SokobanLevels xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="SokobanLev.xsd">
   <Title>Original &amp; Extra</Title>

@@ -20,5 +20,7 @@ package object levelsSource {
 
     def loadLevelCollection(): ZIO[LevelsSource, Throwable, LevelCollection] =
       ZIO.accessM[LevelsSource](_.get.loadLevelCollection())
+
   }
+
 }
