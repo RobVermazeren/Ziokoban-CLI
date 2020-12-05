@@ -18,15 +18,6 @@ object ResourceLevelsSource {
 
   case class LiveService() extends LevelsSource.Service {
 
-    final def loadLevel(id: String): Task[Option[Level]] =
-      loadResource(id) match {
-        case Failure(_: java.io.FileNotFoundException) => // File not found is valid outcome, being translated to None
-          Task.effect(None)
-
-        case t @ _ =>
-          Task.fromTry(t).map(toLevel(_))
-      }
-
     final def loadLevelCollection(): Task[LevelCollection] = {
       val t = (for {
         ss <- SLC.loadFromString(Example.original)
