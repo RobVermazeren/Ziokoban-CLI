@@ -22,7 +22,7 @@ object GameConfig {
     (nested("chars") { gameOutputCharsConfigDescr })(GameOutputConfig.apply, GameOutputConfig.unapply)
 
   val levelsConfigDescr = 
-    (string("directory"))(LevelsConfig.apply, LevelsConfig.unapply)  
+    (string("directory") |@| string("current").optional)(LevelsConfig.apply, LevelsConfig.unapply)  
   
   val gameConfigDescr =
     (nested("gameOutput") { gameOutputConfigDescr } |@| nested("levels") { levelsConfigDescr })(GameConfig.apply, GameConfig.unapply)
