@@ -45,6 +45,8 @@ libraryDependencies ++= Seq(
   // Console handling
   "org.fusesource.jansi" % "jansi" % "1.17.1", // "1.18",
   "org.jline"            % "jline" % "3.10.0", //  "3.16.0",
+  // File handling 
+  "com.lihaoyi"    %% "os-lib"    % "0.7.1",
   // Utility
   "org.scalactic"  %% "scalactic"  % "3.0.8",
   // Testing
