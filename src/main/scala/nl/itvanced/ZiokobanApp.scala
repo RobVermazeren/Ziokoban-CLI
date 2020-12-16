@@ -28,10 +28,10 @@ object ZiokobanApp extends App {
       .exitCode
 
   def program(): ZIO[ZEnv, Throwable, Unit] = {
-    val config            = GameConfig.asLayer
-    val gameInputLayer    = JLineGameInput.live
-    val gameOutputLayer   = config.narrow(_.gameOutput) >>> AnsiConsoleOutput.live
-    val levelsProviderLayer = ResourceLevelsProvider.live
+    val config              = GameConfig.asLayer
+    val gameInputLayer      = JLineGameInput.live
+    val gameOutputLayer     = config.narrow(_.gameOutput) >>> AnsiConsoleOutput.live
+    val levelsProviderLayer = config.narrow(_.levels) >>> FilesystemLevelsProvider.live
 
     val layers = gameInputLayer ++ gameOutputLayer ++ levelsProviderLayer
 
