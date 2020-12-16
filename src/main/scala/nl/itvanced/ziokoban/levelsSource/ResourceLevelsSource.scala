@@ -19,10 +19,10 @@ object ResourceLevelsSource {
   case class LiveService() extends LevelsSource.Service {
 
     final def loadLevelCollection(): Task[LevelCollection] = {
-      val t = (for {
+      val t = for {
         ss <- SLC.loadFromString(Example.original)
         lc <- SlcSokobanLevels.toLevelCollection(ss)
-      } yield lc)
+      } yield lc
       Task.fromTry(t)
     }
 
