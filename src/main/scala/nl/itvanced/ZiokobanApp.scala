@@ -9,7 +9,7 @@ object ZiokobanApp extends App {
   import nl.itvanced.ziokoban.Model.Direction
   import nl.itvanced.ziokoban.gameoutput._
   import nl.itvanced.ziokoban.gameinput._
-  import nl.itvanced.ziokoban.levelsSource._
+  import nl.itvanced.ziokoban.levelsProvider._
   import nl.itvanced.ziokoban.GameCommands._
   import nl.itvanced.ziokoban.config.GameConfig
   import nl.itvanced.ziokoban.gameoutput.ansiconsole.AnsiConsoleOutput
@@ -31,16 +31,16 @@ object ZiokobanApp extends App {
     val config            = GameConfig.asLayer
     val gameInputLayer    = JLineGameInput.live
     val gameOutputLayer   = config.narrow(_.gameOutput) >>> AnsiConsoleOutput.live
-    val levelsSourceLayer = ResourceLevelsSource.live
+    val levelsProviderLayer = ResourceLevelsProvider.live
 
-    val layers = gameInputLayer ++ gameOutputLayer ++ levelsSourceLayer
+    val layers = gameInputLayer ++ gameOutputLayer ++ levelsProviderLayer
 
     makeProgram.provideSomeLayer[ZEnv](layers) // Provide all the required layers, except ZEnv.
   }
 
-  val makeProgram: ZIO[GameOutput with GameInput with LevelsSource, Throwable, Unit] = {
+  val makeProgram: ZIO[GameOutput with GameInput with LevelsProvider, Throwable, Unit] = {
     for {
-      l <- LevelsSource.loadLevelCollection().map(_.levels.headOption)
+      l <- LevelsProvider.loadLevelCollection().map(_.levels.headOption)
       _ <- l match {
         case None =>
           GameOutput.println("This is not a valid level")

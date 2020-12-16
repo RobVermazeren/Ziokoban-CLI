@@ -1,4 +1,4 @@
-package nl.itvanced.ziokoban.levelsSource
+package nl.itvanced.ziokoban.levelsProvider
 
 import zio.{Task, UIO, ZIO, ZLayer}
 import nl.itvanced.ziokoban.Level
@@ -9,14 +9,14 @@ import scala.io.Source
 import scala.util.{Failure, Try}
 import nl.itvanced.ziokoban.levels.slc.SlcSokobanLevels
 
-object ResourceLevelsSource {
+object ResourceLevelsProvider {
 
-  val live: ZLayer[Any, Throwable, LevelsSource] =
+  val live: ZLayer[Any, Throwable, LevelsProvider] =
     ZLayer.succeed(
       LiveService()
     )
 
-  case class LiveService() extends LevelsSource.Service {
+  case class LiveService() extends LevelsProvider.Service {
 
     final def loadLevelCollection(): Task[LevelCollection] = {
       val t = for {
