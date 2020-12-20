@@ -1,6 +1,7 @@
 package nl.itvanced.ziokoban.levelsProvider
 
 import zio.{Has, Task, UIO, ZIO, ZLayer}
+import zio.config._
 import nl.itvanced.ziokoban.Level
 import nl.itvanced.ziokoban.levels.LevelCollection
 import nl.itvanced.ziokoban.levels.format.AsciiLevelFormat
@@ -11,17 +12,32 @@ import nl.itvanced.ziokoban.levels.slc.SlcSokobanLevels
 
 object FilesystemLevelsProvider {
   
-  val live: ZLayer[Has[Config], Throwable, LevelsProvider] =
-    ZLayer.fromService(config => new LiveService(config))
+  val live: ZLayer[Has[Config], FilesystemLevelsProviderError, LevelsProvider] =
+    ZLayer.fromEffect(newLiveService())
 
-  case class LiveService(config: Config) extends LevelsProvider.Service {
+  def newLiveService(): ZIO[Has[Config], FilesystemLevelsProviderError, LevelsProvider.Service] = 
+    for {
+      config    <- config[Config]
+      directory <- ZIO.fromEither(validatedDirectory(config.directory))
+    } yield LiveService(directory, config.current)
 
-    val levelsDir = os.pwd / config.directory
+  private def validatedDirectory(dir: String): Either[FilesystemLevelsProviderError, os.Path] = {
+
+    def checkExists(path: os.Path): Either[FilesystemLevelsProviderError, os.Path] = 
+      if (os.exists(path))
+        Right(path)
+      else 
+        Left(FilesystemLevelsProviderError.LevelsDirectoryUnknown)    
+
+    checkExists(os.pwd / dir)
+  }  
+
+  case class LiveService(levelsDirectory: os.Path, currentLevelsFile: Option[String]) extends LevelsProvider.Service {
 
     final def loadLevelCollection(): Task[LevelCollection] = {
       val t = for {
-        fileName    <- Try(config.current.get) // RVNOTE: don't like the get.
-        fileContent <- Try(os.read(levelsDir / s"$fileName.slc"))
+        fileName    <- Try(currentLevelsFile.get) // RVNOTE: don't like the get.
+        fileContent <- Try(os.read(levelsDirectory / s"$fileName.slc"))
         ss          <- SLC.loadFromString(fileContent)
         lc          <- SlcSokobanLevels.toLevelCollection(ss)
       } yield lc
