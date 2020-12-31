@@ -19,7 +19,8 @@ object FilesystemLevelsProvider {
     for {
       config    <- config[Config]
       directory <- ZIO.fromEither(validatedDirectory(config.directory))
-    } yield LiveService(directory, config.current)
+      current   <- ZIO.fromEither(validatedLevelsFile(directory, config.current))
+    } yield LiveService(current)
 
   private def validatedDirectory(dir: String): Either[FilesystemLevelsProviderError, os.Path] = {
 
@@ -32,12 +33,25 @@ object FilesystemLevelsProvider {
     checkExists(os.pwd / dir)
   }  
 
-  case class LiveService(levelsDirectory: os.Path, currentLevelsFile: Option[String]) extends LevelsProvider.Service {
+  private def validatedLevelsFile(directory: os.Path, current: Option[String]): Either[FilesystemLevelsProviderError, os.Path] = {
+    current match {
+      case None => 
+        Left(FilesystemLevelsProviderError.NoFileConfigured)
+
+      case Some(current) =>
+        val fullPath = directory / s"$current.slc"
+        if (os.exists(fullPath))
+          Right(fullPath)
+        else
+          Left(FilesystemLevelsProviderError.SlcFileUnknown(fullPath))  
+    }
+  }
+
+  case class LiveService(levelsFile: os.Path) extends LevelsProvider.Service {
 
     final def loadLevelCollection(): Task[LevelCollection] = {
       val t = for {
-        fileName    <- Try(currentLevelsFile.get) // RVNOTE: don't like the get.
-        fileContent <- Try(os.read(levelsDirectory / s"$fileName.slc"))
+        fileContent <- Try(os.read(levelsFile))
         ss          <- SLC.loadFromString(fileContent)
         lc          <- SlcSokobanLevels.toLevelCollection(ss)
       } yield lc

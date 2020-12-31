@@ -24,7 +24,10 @@ object ZiokobanApp extends App {
    */
   def run(args: List[String]): ZIO[ZEnv, Nothing, ExitCode] =
     program()
-      .tapError(e => putStrLn(s"Execution failed with $e"))
+      .catchSome{
+        case e: FilesystemLevelsProviderError => putStrLn(s"Cannot start Ziokoban: ${e.message}")
+      }
+      .tapError(e => ZIO.succeed(e.printStackTrace()))
       .exitCode
 
   def program(): ZIO[ZEnv, Throwable, Unit] = {
