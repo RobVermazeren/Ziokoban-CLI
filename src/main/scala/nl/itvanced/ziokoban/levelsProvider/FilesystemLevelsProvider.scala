@@ -49,22 +49,13 @@ object FilesystemLevelsProvider {
 
   case class LiveService(levelsFile: os.Path) extends LevelsProvider.Service {
 
-    final def loadLevelCollection(): Task[LevelCollection] = {
-      val t = for {
-        fileContent <- Try(os.read(levelsFile))
-        ss          <- SLC.loadFromString(fileContent)
-        lc          <- SlcSokobanLevels.toLevelCollection(ss)
-      } yield lc
-      Task.fromTry(t)
-    }
-
-    private def loadResource(resourcePath: String): Try[List[String]] =
-      Try {
-        Source.fromResource(resourcePath).getLines().toList
-      }
-
-    private def toLevel(lines: List[String]): Option[Level] = 
-      AsciiLevelFormat.toLevelMap(lines).flatMap(Level.fromLevelMap(_)).toOption
-
+    final def loadLevelCollection(): Task[LevelCollection] = 
+      Task.fromTry(
+        for {
+          fileContent <- Try(os.read(levelsFile))
+          ss          <- SLC.loadFromString(fileContent)
+          lc          <- SlcSokobanLevels.toLevelCollection(ss)
+        } yield lc
+      )
   }
 }
