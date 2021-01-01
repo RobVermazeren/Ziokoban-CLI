@@ -1,4 +1,4 @@
-package nl.itvanced.ziokoban.levelsProvider
+package nl.itvanced.ziokoban.levelsprovider
 
 import zio.{Has, Task, UIO, ZIO, ZLayer}
 import zio.config._
@@ -49,7 +49,7 @@ object FilesystemLevelsProvider {
 
   case class LiveService(levelsFile: os.Path) extends LevelsProvider.Service {
 
-    final def loadLevelCollection(): Task[LevelCollection] = 
+    final def loadLevelCollection(): Task[LevelCollection] = // RVNOTE: This should also read state file and safe data in LevelCollection (somehow) 
       Task.fromTry(
         for {
           fileContent <- Try(os.read(levelsFile))
@@ -57,5 +57,7 @@ object FilesystemLevelsProvider {
           lc          <- SlcSokobanLevels.toLevelCollection(ss)
         } yield lc
       )
+
+    // RVNOTE: saveLevelCollectionState  
   }
 }

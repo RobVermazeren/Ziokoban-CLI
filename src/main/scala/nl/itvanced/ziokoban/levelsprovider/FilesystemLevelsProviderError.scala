@@ -1,4 +1,4 @@
-package nl.itvanced.ziokoban.levelsProvider
+package nl.itvanced.ziokoban.levelsprovider
 
 import nl.itvanced.ziokoban.error.ZiokobanError
 

@@ -9,7 +9,7 @@ object ZiokobanApp extends App {
   import nl.itvanced.ziokoban.Model.Direction
   import nl.itvanced.ziokoban.gameoutput._
   import nl.itvanced.ziokoban.gameinput._
-  import nl.itvanced.ziokoban.levelsProvider._
+  import nl.itvanced.ziokoban.levelsprovider._
   import nl.itvanced.ziokoban.GameCommands._
   import nl.itvanced.ziokoban.config.GameConfig
   import nl.itvanced.ziokoban.gameoutput.ansiconsole.AnsiConsoleOutput
