@@ -3,7 +3,7 @@ package nl.itvanced.ziokoban.levels
 import zio.test._
 import Assertion._
 import zio.random.Random
-import nl.itvanced.ziokoban.Model._
+import nl.itvanced.ziokoban.model._
 import zio.UIO
 
 object LevelMapSpec extends DefaultRunnableSpec {

@@ -13,7 +13,7 @@ object AnsiConsoleOutput {
     config: Config
   ) extends GameOutput.Service {
     import nl.itvanced.ziokoban.GameState
-    import nl.itvanced.ziokoban.Model.Coord
+    import nl.itvanced.ziokoban.model.Coord
     import org.fusesource.jansi.{Ansi, AnsiConsole}
     import zio.Task
 

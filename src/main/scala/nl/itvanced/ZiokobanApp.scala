@@ -6,7 +6,7 @@ import zio.ExitCode
 object ZiokobanApp extends App {
   import zio.console.putStrLn
   import nl.itvanced.ziokoban.{GameState, PlayingLevel}
-  import nl.itvanced.ziokoban.Model.Direction
+  import nl.itvanced.ziokoban.model.Direction
   import nl.itvanced.ziokoban.gameoutput._
   import nl.itvanced.ziokoban.gameinput._
   import nl.itvanced.ziokoban.levelsprovider._

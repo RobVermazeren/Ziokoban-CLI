@@ -2,7 +2,7 @@ package nl.itvanced.ziokoban.gameoutput.ansiconsole
 
 object ConsoleDrawing {
   import cats.data.State
-  import nl.itvanced.ziokoban.Model.Coord
+  import nl.itvanced.ziokoban.model.Coord
   import org.fusesource.jansi.Ansi
   import org.fusesource.jansi.Ansi.Attribute
   import org.fusesource.jansi.Ansi.{Color => AnsiColor}

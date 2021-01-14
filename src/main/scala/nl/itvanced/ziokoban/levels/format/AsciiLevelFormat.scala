@@ -1,6 +1,6 @@
 package nl.itvanced.ziokoban.levels.format
 
-import nl.itvanced.ziokoban.Model._
+import nl.itvanced.ziokoban.model._
 import nl.itvanced.ziokoban.levels.LevelMap
 import scala.util.{Failure, Success, Try}
 

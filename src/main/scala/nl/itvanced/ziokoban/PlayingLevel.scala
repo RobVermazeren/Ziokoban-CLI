@@ -1,6 +1,6 @@
 package nl.itvanced.ziokoban
 
-import nl.itvanced.ziokoban.Model._
+import nl.itvanced.ziokoban.model._
 import nl.itvanced.ziokoban.levels.{LevelFieldMap, LevelMap}
 import scala.util.Try
 

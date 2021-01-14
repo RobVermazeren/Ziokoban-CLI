@@ -1,7 +1,7 @@
 package nl.itvanced.ziokoban
 
-import nl.itvanced.ziokoban.Model._
-import nl.itvanced.ziokoban.Model.Direction._
+import nl.itvanced.ziokoban.model._
+import nl.itvanced.ziokoban.model.Direction._
 import scala.annotation.tailrec
 
 case class GameStep(pusherLocation: Coord, crateLocations: Set[Coord], appliedDirection: Direction)

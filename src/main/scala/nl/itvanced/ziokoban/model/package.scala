@@ -1,6 +1,6 @@
 package nl.itvanced.ziokoban
 
-object Model {
+package object model {
   sealed trait Direction
 
   object Direction {
