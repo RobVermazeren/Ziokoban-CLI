@@ -1,4 +1,4 @@
-package nl.itvanced.ziokoban.levelsprovider
+package nl.itvanced.ziokoban.levelcollectionprovider
 
 final case class Config(
   directory: String,

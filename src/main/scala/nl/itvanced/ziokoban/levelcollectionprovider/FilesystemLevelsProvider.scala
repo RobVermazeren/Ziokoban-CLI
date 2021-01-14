@@ -1,4 +1,4 @@
-package nl.itvanced.ziokoban.levelsprovider
+package nl.itvanced.ziokoban.levelcollectionprovider
 
 import zio.{Has, Task, UIO, ZIO, ZLayer}
 import zio.config._

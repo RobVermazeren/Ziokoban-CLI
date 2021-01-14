@@ -1,7 +1,7 @@
 package nl.itvanced.ziokoban.config
 
 import nl.itvanced.ziokoban.gameoutput.ansiconsole.{Config => GameOutputConfig, CharConfig => GameOutputCharConfig}
-import nl.itvanced.ziokoban.levelsprovider.{Config => LevelsConfig}
+import nl.itvanced.ziokoban.levelcollectionprovider.{Config => LevelsConfig}
 import zio.{Task, ZIO}
 import zio.config._, ConfigDescriptor._, ConfigSource._
 import zio.config.typesafe.TypesafeConfigSource._
