@@ -5,6 +5,7 @@ import nl.itvanced.ziokoban.levels.LevelCollection
 import nl.itvanced.ziokoban.model.LevelMap
 import scala.util.{Failure, Success, Try}
 import nl.itvanced.ziokoban.levels.format.AsciiLevelFormat
+import nl.itvanced.ziokoban.levels.LevelSpec
 
 case class SlcSokobanLevels(
   title: String,
@@ -17,7 +18,7 @@ case class SlcSokobanLevels(
 object SlcSokobanLevels {
 
   def toLevelCollection(sls: SlcSokobanLevels): Try[LevelCollection] = { // RVNOTE: Consider using Validated to collect all errors. (Nice output)
-    val convertedLevels           = sls.collection.levels.map(convert)
+    val convertedLevels: List[Try[LevelSpec]] = sls.collection.levels.map(convert)
     val failureIndices: List[Int] = convertedLevels.zipWithIndex.collect { case (Failure(e), i) => i }
     failureIndices match {
       case Nil => // No failures
@@ -33,12 +34,11 @@ object SlcSokobanLevels {
     }
   }
 
-// RVNOTE: back to private
-  def convert(l: SlcLevel): Try[PlayingLevel] =
+  private def convert(l: SlcLevel): Try[LevelSpec] =
     for {
       levelMap <- AsciiLevelFormat.toLevelMap(l.lines)
-      level    <- PlayingLevel.fromLevelMap(levelMap)
-    } yield level
+    } yield
+      LevelSpec(id = l.id, map = levelMap)
 
 }
 

@@ -2,6 +2,8 @@ package nl.itvanced
 
 import zio.{App, UIO, ZEnv}
 import zio.ExitCode
+import nl.itvanced.ziokoban.levels.LevelCollection
+import nl.itvanced.ziokoban.levels.LevelSpec
 
 object ZiokobanApp extends App {
   import zio.console.putStrLn
@@ -43,14 +45,14 @@ object ZiokobanApp extends App {
 
   val makeProgram: ZIO[GameOutput with GameInput with LevelCollectionProvider, Throwable, Unit] = {
     for {
-      l <- LevelCollectionProvider.loadLevelCollection().map(_.levels.headOption)
-      _ <- l match {
+      lc <- LevelCollectionProvider.loadLevelCollection()
+      _  <- firstPlayingLevel(lc) match {
         case None =>
           GameOutput.println("This is not a valid level")
 
-        case Some(level) =>
+        case Some(playingLevel) =>
           for {
-            won <- playLevel(level)
+            won <- playLevel(playingLevel)
           } yield {
             if (won) GameOutput.println("Congratulations, you won!")
             else GameOutput.println("Better luck next time")
@@ -58,6 +60,12 @@ object ZiokobanApp extends App {
       }
     } yield ()
   }
+
+  private def firstPlayingLevel(lc: LevelCollection): Option[PlayingLevel] =
+    for {
+      levelSpec    <- lc.levels.headOption
+      playingLevel <- PlayingLevel.fromLevelMap(levelSpec.map).toOption
+    } yield playingLevel
 
   private def playLevel(level: PlayingLevel): ZIO[GameOutput with GameInput, Throwable, Boolean] = {
     val gameState = GameState.startLevel(level)
