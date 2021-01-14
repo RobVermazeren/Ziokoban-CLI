@@ -2,13 +2,11 @@ package nl.itvanced
 
 import zio.{App, UIO, ZEnv}
 import zio.ExitCode
-import nl.itvanced.ziokoban.levels.LevelCollection
-import nl.itvanced.ziokoban.levels.LevelSpec
 
 object ZiokobanApp extends App {
   import zio.console.putStrLn
   import nl.itvanced.ziokoban.{GameState, PlayingLevel}
-  import nl.itvanced.ziokoban.model.Direction
+  import nl.itvanced.ziokoban.model.{Direction, LevelCollection, LevelSpec}
   import nl.itvanced.ziokoban.gameoutput._
   import nl.itvanced.ziokoban.gameinput._
   import nl.itvanced.ziokoban.levelcollectionprovider._

@@ -1,7 +1,7 @@
 package nl.itvanced.ziokoban
 
 import zio.{Has, Task, ZIO}
-import nl.itvanced.ziokoban.levels.LevelCollection
+import nl.itvanced.ziokoban.model.LevelCollection
 
 package object levelcollectionprovider {
 

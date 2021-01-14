@@ -1,11 +1,11 @@
 package nl.itvanced.ziokoban.levels.slc
 
 import nl.itvanced.ziokoban.PlayingLevel
-import nl.itvanced.ziokoban.levels.LevelCollection
+import nl.itvanced.ziokoban.model.LevelCollection
 import nl.itvanced.ziokoban.model.LevelMap
 import scala.util.{Failure, Success, Try}
 import nl.itvanced.ziokoban.levels.format.AsciiLevelFormat
-import nl.itvanced.ziokoban.levels.LevelSpec
+import nl.itvanced.ziokoban.model.LevelSpec
 
 case class SlcSokobanLevels(
   title: String,

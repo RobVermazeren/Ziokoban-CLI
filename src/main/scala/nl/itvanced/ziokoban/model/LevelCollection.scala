@@ -1,8 +1,8 @@
-package nl.itvanced.ziokoban.levels
+package nl.itvanced.ziokoban.model
 
 import nl.itvanced.ziokoban.model.LevelMap
 
-case class LevelCollection( // RVNOTE: Move this out of levels
+case class LevelCollection( 
   title: String,
   description: String,
   levels: List[LevelSpec]

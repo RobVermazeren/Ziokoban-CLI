@@ -2,7 +2,7 @@ package nl.itvanced.ziokoban.levelcollectionprovider
 
 import zio.{Task, UIO, ZIO, ZLayer}
 import nl.itvanced.ziokoban.PlayingLevel
-import nl.itvanced.ziokoban.levels.LevelCollection
+import nl.itvanced.ziokoban.model.LevelCollection
 import nl.itvanced.ziokoban.levels.format.AsciiLevelFormat
 import nl.itvanced.ziokoban.levels.slc.{Example, SLC}
 import scala.io.Source
