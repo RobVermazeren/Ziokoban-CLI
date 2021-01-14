@@ -5,17 +5,17 @@ import nl.itvanced.ziokoban.levels.LevelCollection
 
 package object levelcollectionprovider {
 
-  type LevelsProvider = Has[LevelsProvider.Service]
+  type LevelCollectionProvider = Has[LevelCollectionProvider.Service]
 
-  object LevelsProvider {
+  object LevelCollectionProvider {
 
     trait Service {
       def loadLevelCollection(): Task[LevelCollection]
     }
 
     // Accessor methods
-    def loadLevelCollection(): ZIO[LevelsProvider, Throwable, LevelCollection] =
-      ZIO.accessM[LevelsProvider](_.get.loadLevelCollection())
+    def loadLevelCollection(): ZIO[LevelCollectionProvider, Throwable, LevelCollection] =
+      ZIO.accessM[LevelCollectionProvider](_.get.loadLevelCollection())
 
   }
 

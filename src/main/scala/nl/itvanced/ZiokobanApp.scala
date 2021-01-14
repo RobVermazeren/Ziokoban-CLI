@@ -25,7 +25,7 @@ object ZiokobanApp extends App {
   def run(args: List[String]): ZIO[ZEnv, Nothing, ExitCode] =
     program()
       .catchSome{
-        case e: FilesystemLevelsProviderError => putStrLn(s"Cannot start Ziokoban: ${e.message}")
+        case e: FilesystemLevelCollectionProviderError => putStrLn(s"Cannot start Ziokoban: ${e.message}")
       }
       .tapError(e => ZIO.succeed(e.printStackTrace()))
       .exitCode
@@ -34,16 +34,16 @@ object ZiokobanApp extends App {
     val config              = GameConfig.asLayer
     val gameInputLayer      = JLineGameInput.live
     val gameOutputLayer     = config.narrow(_.gameOutput) >>> AnsiConsoleOutput.live
-    val levelsProviderLayer = config.narrow(_.levels) >>> FilesystemLevelsProvider.live
+    val levelsProviderLayer = config.narrow(_.levels) >>> FilesystemLevelCollectionProvider.live
 
     val layers = gameInputLayer ++ gameOutputLayer ++ levelsProviderLayer
 
     makeProgram.provideSomeLayer[ZEnv](layers) // Provide all the required layers, except ZEnv.
   }
 
-  val makeProgram: ZIO[GameOutput with GameInput with LevelsProvider, Throwable, Unit] = {
+  val makeProgram: ZIO[GameOutput with GameInput with LevelCollectionProvider, Throwable, Unit] = {
     for {
-      l <- LevelsProvider.loadLevelCollection().map(_.levels.headOption)
+      l <- LevelCollectionProvider.loadLevelCollection().map(_.levels.headOption)
       _ <- l match {
         case None =>
           GameOutput.println("This is not a valid level")
