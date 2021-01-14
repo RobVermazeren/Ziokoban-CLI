@@ -52,7 +52,7 @@ object JLineGameInput {
         ZIO
           .effect[Int](reader.read)
           .mapError(_ => "Read error")
-          .either // TODO: bit too simplified error handling.
+          .either // RVNOTE: bit too simplified error handling.
       gce <- UIO.succeed(e.flatMap { i =>
         i match {
           case 'w' | 65 => Right(GameCommands.MoveUp)
@@ -66,7 +66,7 @@ object JLineGameInput {
       })
       _ <- gce match {
         case Right(gc) => queue.offer(gc)
-        case Left(s)   => ZIO.unit // TODO: any errors are ignored.
+        case Left(s)   => ZIO.unit // RVNOTE: any errors are ignored.
       }
     } yield ()
   }.repeat(Schedule.spaced(Duration(2, TimeUnit.MILLISECONDS))).unit
