@@ -57,7 +57,5 @@ object FilesystemLevelCollectionProvider {
           lc          <- SlcSokobanLevels.toLevelCollection(ss)
         } yield lc
       )
-
-    // RVNOTE: saveLevelCollectionState  
   }
 }
