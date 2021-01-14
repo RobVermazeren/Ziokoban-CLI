@@ -1,11 +1,9 @@
-package nl.itvanced.ziokoban.levels
+package nl.itvanced.ziokoban.model
 
-import nl.itvanced.ziokoban.model._
 import scala.annotation.tailrec
 import scala.util.{Failure, Success, Try}
 
 object LevelMap {
-  import nl.itvanced.ziokoban.model.{Coord, Field, Tile}
 
   // Return all fields from m, that are reachable from s.
   def reachableFields(m: LevelFieldMap, start: Coord): Set[Coord] =

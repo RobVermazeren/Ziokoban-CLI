@@ -27,4 +27,10 @@ package object model {
     }
 
   case class Coord(x: Int, y: Int)
+
+  /** Type alias for a map that represents a Level. */
+  type LevelMap = Map[Coord, Tile]
+
+  /** Type alias for a map that represents all field of a Level. */
+  type LevelFieldMap = Map[Coord, Field]
 }
