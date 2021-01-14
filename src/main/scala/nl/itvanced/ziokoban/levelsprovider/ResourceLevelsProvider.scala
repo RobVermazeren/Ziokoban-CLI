@@ -1,7 +1,7 @@
 package nl.itvanced.ziokoban.levelsprovider
 
 import zio.{Task, UIO, ZIO, ZLayer}
-import nl.itvanced.ziokoban.Level
+import nl.itvanced.ziokoban.PlayingLevel
 import nl.itvanced.ziokoban.levels.LevelCollection
 import nl.itvanced.ziokoban.levels.format.AsciiLevelFormat
 import nl.itvanced.ziokoban.levels.slc.{Example, SLC}
@@ -31,8 +31,8 @@ object ResourceLevelsProvider {
         Source.fromResource(resourcePath).getLines().toList
       }
 
-    private def toLevel(lines: List[String]): Option[Level] =
-      AsciiLevelFormat.toLevelMap(lines).flatMap(Level.fromLevelMap(_)).toOption
+    private def toLevel(lines: List[String]): Option[PlayingLevel] =
+      AsciiLevelFormat.toLevelMap(lines).flatMap(PlayingLevel.fromLevelMap(_)).toOption
 
   }
 

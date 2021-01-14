@@ -5,7 +5,7 @@ import zio.ExitCode
 
 object ZiokobanApp extends App {
   import zio.console.putStrLn
-  import nl.itvanced.ziokoban.{GameState, Level}
+  import nl.itvanced.ziokoban.{GameState, PlayingLevel}
   import nl.itvanced.ziokoban.Model.Direction
   import nl.itvanced.ziokoban.gameoutput._
   import nl.itvanced.ziokoban.gameinput._
@@ -59,7 +59,7 @@ object ZiokobanApp extends App {
     } yield ()
   }
 
-  private def playLevel(level: Level): ZIO[GameOutput with GameInput, Throwable, Boolean] = {
+  private def playLevel(level: PlayingLevel): ZIO[GameOutput with GameInput, Throwable, Boolean] = {
     val gameState = GameState.startLevel(level)
     for {
       _  <- GameOutput.preDrawing(gameState)

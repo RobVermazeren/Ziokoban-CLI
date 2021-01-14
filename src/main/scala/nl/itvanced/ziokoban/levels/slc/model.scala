@@ -1,6 +1,6 @@
 package nl.itvanced.ziokoban.levels.slc
 
-import nl.itvanced.ziokoban.Level
+import nl.itvanced.ziokoban.PlayingLevel
 import nl.itvanced.ziokoban.levels.LevelCollection
 import nl.itvanced.ziokoban.levels.LevelMap
 import scala.util.{Failure, Success, Try}
@@ -34,10 +34,10 @@ object SlcSokobanLevels {
   }
 
 // RVNOTE: back to private
-  def convert(l: SlcLevel): Try[Level] =
+  def convert(l: SlcLevel): Try[PlayingLevel] =
     for {
       levelMap <- AsciiLevelFormat.toLevelMap(l.lines)
-      level    <- Level.fromLevelMap(levelMap)
+      level    <- PlayingLevel.fromLevelMap(levelMap)
     } yield level
 
 }

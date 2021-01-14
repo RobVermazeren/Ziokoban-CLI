@@ -5,7 +5,7 @@ import nl.itvanced.ziokoban.levels.{LevelFieldMap, LevelMap}
 import scala.util.Try
 
 /** Trait representing a Sokoban level. */
-trait Level {
+trait PlayingLevel {
 
   /** the source LevelMap */
   def map: LevelMap
@@ -50,14 +50,14 @@ trait Level {
   def isTarget(c: Coord): Boolean = targets.contains(c)
 }
 
-object Level {
+object PlayingLevel {
 
   /**
    * Create a level for this map.
    *  @param levelMap map of level to be created.
    *  @return Some containing Level if levelMap represents a valid level, None otherwise.
    */
-  def fromLevelMap(levelMap: LevelMap): Try[Level] = {
+  def fromLevelMap(levelMap: LevelMap): Try[PlayingLevel] = {
     val fieldMap: LevelFieldMap = levelMap.collect {
       case (c, f @ Field(_, _)) => c -> f
     }
@@ -73,7 +73,7 @@ object Level {
       reachableFields = LevelMap.reachableFields(fieldMap, pusherLocation)
       if (crateLocations subsetOf reachableFields)
       if (targetLocations subsetOf reachableFields)
-    } yield new Level {
+    } yield new PlayingLevel {
       val map: LevelMap       = levelMap
       val fields: Set[Coord]  = reachableFields
       val walls: Set[Coord]   = wallLocations

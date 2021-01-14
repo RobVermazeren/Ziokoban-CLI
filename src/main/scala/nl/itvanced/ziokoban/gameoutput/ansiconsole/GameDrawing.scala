@@ -2,7 +2,7 @@ package nl.itvanced.ziokoban.gameoutput.ansiconsole
 
 import cats.data.State
 import nl.itvanced.ziokoban.GameState
-import nl.itvanced.ziokoban.Level
+import nl.itvanced.ziokoban.PlayingLevel
 import nl.itvanced.ziokoban.Model._
 
 /** Class for drawing a game in an ansi console. */
@@ -58,7 +58,7 @@ final case class GameDrawing(config: CharConfig) {
    *  @param level The level to draw
    *  @return The ConsoleDrawState that will draw the static parts of given level.
    */
-  def drawStatic(levelToScreenPosition: Coord => Coord)(level: Level): ConsoleDrawState[Unit] =
+  def drawStatic(levelToScreenPosition: Coord => Coord)(level: PlayingLevel): ConsoleDrawState[Unit] =
     for {
       _ <- Draw.setBackGroundColor(wallColor)
       s <- Draw.drawChars(level.walls.map(levelToScreenPosition), ' ')

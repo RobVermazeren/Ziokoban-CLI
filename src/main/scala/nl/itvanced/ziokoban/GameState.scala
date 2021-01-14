@@ -10,7 +10,7 @@ case class GameStep(pusherLocation: Coord, crateLocations: Set[Coord], appliedDi
 trait GameState {
 
   /** the level being played */
-  def level: Level
+  def level: PlayingLevel
 
   /** the location of the pusher */
   def pusher: Coord
@@ -44,7 +44,7 @@ object GameState {
    * @param sourceLevel Level to use.
    * @return            An initial game state for sourceLevel.
    */
-  def startLevel(sourceLevel: Level) =
+  def startLevel(sourceLevel: PlayingLevel) =
     new GameState {
       val level    = sourceLevel
       val pusher   = level.pusher
