@@ -26,6 +26,9 @@ object ResourceLevelCollectionProvider {
       Task.fromTry(t)
     }
 
+    final def levelCollectionStatsPath(): Task[Option[os.Path]] =
+      Task(None)
+
     private def loadResource(resourcePath: String): Try[List[String]] =
       Try {
         Source.fromResource(resourcePath).getLines().toList

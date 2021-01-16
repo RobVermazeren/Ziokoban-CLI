@@ -11,6 +11,9 @@ import scala.util.{Failure, Try}
 import nl.itvanced.ziokoban.levels.slc.SlcSokobanLevels
 
 object FilesystemLevelCollectionProvider {
+
+  private val CollectionFileExtension = "slc" 
+  private val StatsFileExtension      = "zkb" 
   
   val live: ZLayer[Has[Config], FilesystemLevelCollectionProviderError, LevelCollectionProvider] =
     ZLayer.fromEffect(newLiveService())
@@ -19,8 +22,11 @@ object FilesystemLevelCollectionProvider {
     for {
       config    <- config[Config]
       directory <- ZIO.fromEither(validatedDirectory(config.directory))
-      current   <- ZIO.fromEither(validatedLevelsFile(directory, config.current))
-    } yield LiveService(current)
+      current   <- ZIO.fromEither(validatedLevelsFile(directory, config.current, CollectionFileExtension))
+    } yield LiveService(
+              levelsFile = fullPath(directory, current, CollectionFileExtension),
+              statsFile  = Some(fullPath(directory, current, StatsFileExtension))
+            )
 
   private def validatedDirectory(dir: String): Either[FilesystemLevelCollectionProviderError, os.Path] = {
 
@@ -33,23 +39,25 @@ object FilesystemLevelCollectionProvider {
     checkExists(os.pwd / dir)
   }  
 
-  private def validatedLevelsFile(directory: os.Path, current: Option[String]): Either[FilesystemLevelCollectionProviderError, os.Path] = {
+  private def validatedLevelsFile(directory: os.Path, current: Option[String], extension: String): Either[FilesystemLevelCollectionProviderError, String] = {
     current match {
       case None => 
         Left(FilesystemLevelCollectionProviderError.NoFileConfigured)
 
       case Some(current) =>
-        val fullPath = directory / s"$current.slc"
-        if (os.exists(fullPath))
-          Right(fullPath)
+        val filePath = fullPath(directory, current, extension) 
+        if (os.exists(filePath))
+          Right(current)
         else
-          Left(FilesystemLevelCollectionProviderError.SlcFileUnknown(fullPath))  
+          Left(FilesystemLevelCollectionProviderError.SlcFileUnknown(filePath))  
     }
   }
 
-  case class LiveService(levelsFile: os.Path) extends LevelCollectionProvider.Service {
+  private def fullPath(directory: os.Path, filename: String, extension: String) = directory / s"$filename.$extension"  
 
-    final def loadLevelCollection(): Task[LevelCollection] = // RVNOTE: This should also read state file and safe data in LevelCollection (somehow) 
+  case class LiveService(levelsFile: os.Path, statsFile: Option[os.Path]) extends LevelCollectionProvider.Service {
+
+    final def loadLevelCollection(): Task[LevelCollection] = // RVNOTE: There should be an error type for SLC format errors (with relevant message). 
       Task.fromTry(
         for {
           fileContent <- Try(os.read(levelsFile))
@@ -57,5 +65,7 @@ object FilesystemLevelCollectionProvider {
           lc          <- SlcSokobanLevels.toLevelCollection(ss)
         } yield lc
       )
+
+    final def levelCollectionStatsPath(): Task[Option[os.Path]] = Task.succeed(statsFile)
   }
 }

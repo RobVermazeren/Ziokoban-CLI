@@ -10,13 +10,17 @@ package object levelcollectionprovider {
   object LevelCollectionProvider {
 
     trait Service {
-      def loadLevelCollection(): Task[LevelCollection]
-    }
+      /** Load the current configured level collection. */
+      def loadLevelCollection(): Task[LevelCollection] 
+
+      /** Return the path of the stats file for the current configured level collection. None means no stats are stored. */
+      def levelCollectionStatsPath(): Task[Option[os.Path]]
+   }
 
     // Accessor methods
     def loadLevelCollection(): ZIO[LevelCollectionProvider, Throwable, LevelCollection] =
       ZIO.accessM[LevelCollectionProvider](_.get.loadLevelCollection())
 
-  }
+  } 
 
 }
