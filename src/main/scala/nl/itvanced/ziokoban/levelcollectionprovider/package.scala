@@ -21,6 +21,8 @@ package object levelcollectionprovider {
     def loadLevelCollection(): ZIO[LevelCollectionProvider, Throwable, LevelCollection] =
       ZIO.accessM[LevelCollectionProvider](_.get.loadLevelCollection())
 
+    def levelCollectionStatsPath(): ZIO[LevelCollectionProvider, Throwable, Option[os.Path]] =
+      ZIO.accessM[LevelCollectionProvider](_.get.levelCollectionStatsPath())   
   } 
 
 }

@@ -44,6 +44,8 @@ object ZiokobanApp extends App {
   val makeProgram: ZIO[GameOutput with GameInput with LevelCollectionProvider, Throwable, Unit] = {
     for {
       lc <- LevelCollectionProvider.loadLevelCollection()
+      // RVNOTE: Need an extra layer here, that takes care of the "playing the collection" 
+      //         Logic below will become part of that layer.
       _  <- firstPlayingLevel(lc) match {
         case None =>
           GameOutput.println("This is not a valid level")
@@ -59,9 +61,10 @@ object ZiokobanApp extends App {
     } yield ()
   }
 
+  // RVNOTE: This is a temporary method so we can play the first level
   private def firstPlayingLevel(lc: LevelCollection): Option[PlayingLevel] =
     for {
-      levelSpec    <- lc.levels.headOption
+      levelSpec    <- lc.levels.tail.headOption
       playingLevel <- PlayingLevel.fromLevelMap(levelSpec.map).toOption
     } yield playingLevel
 
