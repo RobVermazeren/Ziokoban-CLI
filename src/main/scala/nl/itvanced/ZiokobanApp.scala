@@ -31,6 +31,7 @@ object ZiokobanApp extends App {
       .exitCode
 
   def program(): ZIO[ZEnv, Throwable, Unit] = {
+    // Create instances of all layers and construct the required environment.
     val config              = GameConfig.asLayer
     val gameInputLayer      = JLineGameInput.live
     val gameOutputLayer     = config.narrow(_.gameOutput) >>> AnsiConsoleOutput.live
