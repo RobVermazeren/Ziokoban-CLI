@@ -13,8 +13,9 @@ Well, this is my ZIO playground project. I chose to make a game, because I wante
 ## Functionality
 The current features/restrictions are:
 - Played in the terminal.
-- Levels are read from a slc file, containing a set of sokobon levels, that needs to be provided.
+- Levels are read from a slc file, containing a set of sokobon levels. This file is not included.
   Example source of slc files is [this sokoban website](http://www.sourcecode.se/sokoban/levels)
+- Slc file to use is configured in `ziokoban.conf`.  
 - Currently only one level of the collection is played.
 - Navigation using arrow keys and WASD keys.
 - Undo moves with X key.
