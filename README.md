@@ -2,7 +2,7 @@
 
 ## Introduction
 
-After I attended a 5-day Functional Scala course by John A. De Goes in September 2018, I wanted to play around with the [ZIO](https://zio.dev) library.
+After attending a 5-day Functional Scala course by John A. De Goes in September 2018, I wanted to play around with the [ZIO](https://zio.dev) library.
 
 Well, this is my ZIO playground project. I chose to make a game, because I wanted something with garanteed side effects. I chose [Sokoban](https://en.wikipedia.org/wiki/Sokoban), because it is one of my favorite games ever!
 
@@ -13,7 +13,9 @@ Well, this is my ZIO playground project. I chose to make a game, because I wante
 ## Functionality
 The current features/restrictions are:
 - Played in the terminal.
-- Currently only one fixed level.
+- Levels are read from a slc file, containing a set of sokobon levels, that needs to be provided.
+  Example source of slc files is [this sokoban website](http://www.sourcecode.se/sokoban/levels)
+- Currently only one level of the collection is played.
 - Navigation using arrow keys and WASD keys.
 - Undo moves with X key.
 - Quit the game with the Q key.
@@ -21,10 +23,12 @@ The current features/restrictions are:
 
 ## Used ZIO features
 - ZIO ;-)
-- Environments
+- Layers
 - Queue
 - Ref
 - Schedule
+- ZIO Config
+- ZIO Test
  
 ## Ideas for future features 
 My list of possible improvements and extentions:

@@ -55,8 +55,8 @@ object ZiokobanApp extends App {
           for {
             result <- GamePlayController.playLevel(playingLevel)
             _      <- result match {
-              case PlayLevelResult.Solved => GameOutput.println("Congratulations, you won!")
-              case PlayLevelResult.Failed => GameOutput.println("Better luck next time")
+              case PlayLevelResult.Solved  => GameOutput.println("Congratulations, you won!")
+              case PlayLevelResult.Failed  => GameOutput.println("Better luck next time")
               case PlayLevelResult.Aborted => GameOutput.println("Don't give up!") // RVNOTE: Currently not possible
             } 
             _      <- GameOutput.println("Thank you for playing ZIOKOBAN")
