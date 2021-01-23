@@ -5,12 +5,12 @@ import zio.ExitCode
 
 object ZiokobanApp extends App {
   import zio.console.putStrLn
-  import nl.itvanced.ziokoban.{GameState, PlayingLevel}
-  import nl.itvanced.ziokoban.model.{Direction, LevelCollection, LevelSpec}
+  import nl.itvanced.ziokoban.{PlayingLevel}
+  import nl.itvanced.ziokoban.model.LevelCollection
   import nl.itvanced.ziokoban.gameoutput._
   import nl.itvanced.ziokoban.gameinput._
+  import nl.itvanced.ziokoban.gameplay._
   import nl.itvanced.ziokoban.levelcollectionprovider._
-  import nl.itvanced.ziokoban.GameCommands._
   import nl.itvanced.ziokoban.config.GameConfig
   import nl.itvanced.ziokoban.gameoutput.ansiconsole.AnsiConsoleOutput
   import zio.ZIO
@@ -34,14 +34,15 @@ object ZiokobanApp extends App {
     val config              = GameConfig.asLayer
     val gameInputLayer      = JLineGameInput.live
     val gameOutputLayer     = config.narrow(_.gameOutput) >>> AnsiConsoleOutput.live
+    val gamePlayLayer       = (gameInputLayer ++ gameOutputLayer) >>>  DefaultGamePlayController.live
     val levelsProviderLayer = config.narrow(_.levels) >>> FilesystemLevelCollectionProvider.live
 
-    val layers = gameInputLayer ++ gameOutputLayer ++ levelsProviderLayer
+    val layers = gameOutputLayer ++ gamePlayLayer ++ levelsProviderLayer
 
     makeProgram.provideSomeLayer[ZEnv](layers) // Provide all the required layers, except ZEnv.
   }
 
-  val makeProgram: ZIO[GameOutput with GameInput with LevelCollectionProvider, Throwable, Unit] = {
+  val makeProgram: ZIO[GameOutput with GamePlayController with LevelCollectionProvider, Throwable, Unit] = {
     for {
       lc <- LevelCollectionProvider.loadLevelCollection()
       // RVNOTE: Need an extra layer here, that takes care of the "playing the collection" 
@@ -52,11 +53,15 @@ object ZiokobanApp extends App {
 
         case Some(playingLevel) =>
           for {
-            won <- playLevel(playingLevel)
-          } yield {
-            if (won) GameOutput.println("Congratulations, you won!")
-            else GameOutput.println("Better luck next time")
-          } *> GameOutput.println("Thank you for playing ZIOKOBAN")
+            result <- GamePlayController.playLevel(playingLevel)
+            _      <- result match {
+              case PlayLevelResult.Solved => GameOutput.println("Congratulations, you won!")
+              case PlayLevelResult.Failed => GameOutput.println("Better luck next time")
+              case PlayLevelResult.Aborted => GameOutput.println("Don't give up!") // RVNOTE: Currently not possible
+            } 
+            _      <- GameOutput.println("Thank you for playing ZIOKOBAN")
+          } yield // {
+            ()
       }
     } yield ()
   }
@@ -64,58 +69,8 @@ object ZiokobanApp extends App {
   // RVNOTE: This is a temporary method so we can play the first level
   private def firstPlayingLevel(lc: LevelCollection): Option[PlayingLevel] =
     for {
-      levelSpec    <- lc.levels.tail.headOption
+      levelSpec    <- lc.levels.headOption
       playingLevel <- PlayingLevel.fromLevelMap(levelSpec.map).toOption
     } yield playingLevel
-
-  private def playLevel(level: PlayingLevel): ZIO[GameOutput with GameInput, Throwable, Boolean] = {
-    val gameState = GameState.startLevel(level)
-    for {
-      _  <- GameOutput.preDrawing(gameState)
-      _  <- GameOutput.drawGameState(gameState)
-      gs <- gameLoop(gameState)
-      _  <- GameOutput.postDrawing(gs)
-      _ <- gs.isSolved match {
-        case Some(true) =>
-          GameOutput.println(s"Congratulations, you won! \n\nYour steps were ${GameState.allStepsString(gs)}\n")
-        case _ => GameOutput.println("Better luck next time")
-      }
-      _ <- GameOutput.println("Thank you for playing ZIOKOBAN")
-    } yield gs.isSolved.getOrElse(false)
-  }
-
-  private def gameLoop(
-    gs: GameState
-  ): ZIO[GameOutput with GameInput, Throwable, GameState] =
-    for {
-      c <- GameInput.nextCommand()
-      r <- processCommand(c.getOrElse(Noop), gs)
-      s <- if (r.isFinished) ZIO.succeed(r) else gameLoop(r)
-    } yield s
-
-  private def processCommand(gc: GameCommand, gs: GameState): ZIO[GameOutput, Throwable, GameState] =
-    gc match {
-      case mc: MoveCommand =>
-        val newGameState = GameState.move(gs, moveCommand2Direction(mc))
-        for {
-          _ <- GameOutput.drawGameState(newGameState)
-        } yield newGameState
-      case Undo =>
-        val newGameState = GameState.undo(gs)
-        for {
-          _ <- GameOutput.drawGameState(newGameState)
-        } yield newGameState
-      case Quit => ZIO.effectTotal[GameState](GameState.stopGame(gs))
-      case Noop =>
-        ZIO.effectTotal[GameState](gs) // RVNOTE: wait for a moment?
-    }
-
-  private def moveCommand2Direction(mc: MoveCommand): Direction =
-    mc match {
-      case MoveUp    => Direction.Up
-      case MoveRight => Direction.Right
-      case MoveDown  => Direction.Down
-      case MoveLeft  => Direction.Left
-    }
 
 }
