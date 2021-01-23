@@ -32,6 +32,10 @@ object AnsiConsoleOutput {
       Task.effect(AnsiConsole.out.println(result))
     }
 
+    /** Pre drawing:
+     *   - Clear screen.
+     *   - Draw border.
+     */
     def preDrawing(state: GameState): Task[Unit] = {
       val drawing: ConsoleDrawState[Unit] = for {
         _ <- Draw.saveCursorPosition
@@ -45,6 +49,9 @@ object AnsiConsoleOutput {
       Task.effect(AnsiConsole.out.println(result))
     }
 
+    /** Post drawing:
+     *   - Restore console.
+    */
     def postDrawing(state: GameState): Task[Unit] = {
       val rowBelowGame = state.level.height + 4
       val drawing: ConsoleDrawState[Unit] = for {

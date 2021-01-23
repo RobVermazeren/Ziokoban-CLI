@@ -9,9 +9,13 @@ package object gameoutput {
   object GameOutput {
 
     trait Service {
+      /** Draw game state. */
       def drawGameState(state: GameState): Task[Unit]
+      /** Any drawing before drawing game state. */
       def preDrawing(state: GameState): Task[Unit]
+      /** Any drawing after drawing game state. */
       def postDrawing(state: GameState): Task[Unit]
+      /** Print a text. */
       def println[A](text: A): Task[Unit]
     }
 

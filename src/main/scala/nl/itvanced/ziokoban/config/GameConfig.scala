@@ -27,6 +27,11 @@ object GameConfig {
   val gameConfigDescr =
     (nested("gameOutput") { gameOutputConfigDescr } |@| nested("levels") { levelsConfigDescr })(GameConfig.apply, GameConfig.unapply)
 
+  /** Provide Config Layer. 
+   *  Order of looking up settings:
+   *    1. ziokoban.conf in project root directory
+   *    2. reference.conf resource
+   */  
   def asLayer =
     TypesafeConfig.fromHoconFile(new java.io.File("./ziokoban.conf"), gameConfigDescr) <> // = orElse
       TypesafeConfig.fromDefaultLoader(gameConfigDescr)
