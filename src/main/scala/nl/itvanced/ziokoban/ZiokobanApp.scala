@@ -2,15 +2,13 @@ package nl.itvanced.ziokoban
 
 import zio.{App, UIO, ZEnv}
 import zio.ExitCode
-import nl.itvanced.ziokoban.levelcollectioncontroller.DefaultLevelCollectionController
-import nl.itvanced.ziokoban.levelcollectioncontroller.LevelCollectionController
 
 object ZiokobanApp extends App {
   import zio.console.putStrLn
-  import nl.itvanced.ziokoban.model.{LevelCollection, PlayingLevel}
   import nl.itvanced.ziokoban.gameoutput._
   import nl.itvanced.ziokoban.gameinput._
   import nl.itvanced.ziokoban.gameplay._
+  import nl.itvanced.ziokoban.levelcollectioncontroller._
   import nl.itvanced.ziokoban.levelcollectionprovider._
   import nl.itvanced.ziokoban.config.GameConfig
   import nl.itvanced.ziokoban.gameoutput.ansiconsole.AnsiConsoleOutput
