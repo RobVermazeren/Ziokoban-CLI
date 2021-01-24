@@ -1,4 +1,4 @@
-package nl.itvanced
+package nl.itvanced.ziokoban
 
 import zio.{App, UIO, ZEnv}
 import zio.ExitCode
@@ -22,7 +22,7 @@ object ZiokobanApp extends App {
    * Implementation of the run method from App.
    *
    * @param args Command line arguments.
-   * @return     Final ZIO returning an ExitCode and with all errors applied.
+   * @return     Final ZIO returning an ExitCode.
    */
   def run(args: List[String]): ZIO[ZEnv, Nothing, ExitCode] =
     program()

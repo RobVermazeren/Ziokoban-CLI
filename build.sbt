@@ -66,4 +66,4 @@ resolvers ++= Seq(
 
 fork in run := true
 
-mainClass in Compile := Some("nl.itvanced.ZiokobanApp")
+mainClass in Compile := Some("nl.itvanced.ziokoban.ZiokobanApp")
