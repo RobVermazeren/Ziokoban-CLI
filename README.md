@@ -2,9 +2,10 @@
 
 ## Introduction
 
-After attending a 5-day Functional Scala course by John A. De Goes in September 2018, I wanted to play around with the [ZIO](https://zio.dev) library.
+At a 5-day Functional Scala course by John A. De Goes in September 2018, I was introduced to the [ZIO](https://zio.dev) library. Afterwards I really wanted to start playing around with this library. So I started this project.
+I have been regularly working on it ever since, trying to keep up was every new release of the library.
 
-Well, this is my ZIO playground project. I chose to make a game, because I wanted something with garanteed side effects. I chose [Sokoban](https://en.wikipedia.org/wiki/Sokoban), because it is one of my favorite games ever!
+This is a playground project, so its main aim is to get to know the ZIO library. I chose to make a game, because I wanted something with garanteed side effects. I chose [Sokoban](https://en.wikipedia.org/wiki/Sokoban), because it is one of my favorite games ever!
 
 ## Screenshot
 
@@ -22,7 +23,7 @@ The current features/restrictions are:
 - Quit the game with the Q key.
 - Built and tested on Arch Linux. Test on Windows showed issues with the Unicode characters used. (But these can be changed in the config file.)
 
-## Used ZIO features
+## Some ZIO keywords
 - ZIO ;-)
 - Layers
 - Queue
@@ -33,9 +34,8 @@ The current features/restrictions are:
  
 ## Ideas for future features 
 My list of possible improvements and extentions:
-- Add unit tests.
-- Add logging. (displaying in seperate part of screen?)
-- Support loading and playing level sets (examples on [this sokoban website](http://www.sourcecode.se/sokoban/levels))
+- Add more unit tests.
+- Add logging. (displaying in separate part of screen?)
 - Add a game clock and game info/stats on screen.
 - Add dead block detection. (real time parallel calculations and output)
 - Use STM somewhere.
