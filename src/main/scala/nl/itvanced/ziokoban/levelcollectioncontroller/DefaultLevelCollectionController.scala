@@ -4,8 +4,7 @@ import zio.{Has, Task, ZIO, ZLayer}
 import nl.itvanced.ziokoban.levelcollectionprovider.LevelCollectionProvider
 import nl.itvanced.ziokoban.gameplay.GamePlayController
 import zio.Ref
-import nl.itvanced.ziokoban.model.LevelCollection
-import nl.itvanced.ziokoban.PlayingLevel
+import nl.itvanced.ziokoban.model.{LevelCollection, PlayingLevel}
 import nl.itvanced.ziokoban.gameplay.PlayLevelResult
 import nl.itvanced.ziokoban.gameoutput.GameOutput
 

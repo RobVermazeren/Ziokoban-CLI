@@ -1,7 +1,7 @@
 package nl.itvanced.ziokoban.gameplay
 
 import zio.{Task, ZIO, ZLayer}
-import nl.itvanced.ziokoban.{GameCommands, GameState, PlayingLevel}
+import nl.itvanced.ziokoban.model.{GameCommands, GameState, PlayingLevel}
 import nl.itvanced.ziokoban.gameinput.GameInput
 import nl.itvanced.ziokoban.gameoutput.GameOutput
 import nl.itvanced.ziokoban.model.Direction

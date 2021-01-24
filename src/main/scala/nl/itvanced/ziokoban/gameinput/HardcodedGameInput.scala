@@ -5,8 +5,8 @@ import zio.clock.Clock
 import zio.duration.Duration
 import java.util.concurrent.TimeUnit
 
-import nl.itvanced.ziokoban.GameCommands
-import nl.itvanced.ziokoban.GameCommands.GameCommand
+import nl.itvanced.ziokoban.model.GameCommands
+import nl.itvanced.ziokoban.model.GameCommands.GameCommand
 
 //=== Version of GameInput that will (re)play a given sequence of GameCommands ===
 object HardcodedGameInput {

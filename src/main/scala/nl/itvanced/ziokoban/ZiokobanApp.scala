@@ -7,8 +7,7 @@ import nl.itvanced.ziokoban.levelcollectioncontroller.LevelCollectionController
 
 object ZiokobanApp extends App {
   import zio.console.putStrLn
-  import nl.itvanced.ziokoban.{PlayingLevel}
-  import nl.itvanced.ziokoban.model.LevelCollection
+  import nl.itvanced.ziokoban.model.{LevelCollection, PlayingLevel}
   import nl.itvanced.ziokoban.gameoutput._
   import nl.itvanced.ziokoban.gameinput._
   import nl.itvanced.ziokoban.gameplay._

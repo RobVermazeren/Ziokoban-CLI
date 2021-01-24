@@ -1,4 +1,4 @@
-package nl.itvanced.ziokoban
+package nl.itvanced.ziokoban.model
 
 object GameCommands {
 

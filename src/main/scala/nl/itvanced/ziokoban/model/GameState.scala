@@ -1,6 +1,5 @@
-package nl.itvanced.ziokoban
+package nl.itvanced.ziokoban.model
 
-import nl.itvanced.ziokoban.model._
 import nl.itvanced.ziokoban.model.Direction._
 import scala.annotation.tailrec
 

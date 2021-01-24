@@ -1,8 +1,6 @@
 package nl.itvanced.ziokoban.gameoutput.ansiconsole
 
 import cats.data.State
-import nl.itvanced.ziokoban.GameState
-import nl.itvanced.ziokoban.PlayingLevel
 import nl.itvanced.ziokoban.model._
 
 /** Class for drawing a game in an ansi console. */

@@ -6,8 +6,8 @@ import zio.duration.Duration
 import java.util.concurrent.TimeUnit
 import org.jline.utils.NonBlockingReader
 
-import nl.itvanced.ziokoban.GameCommands
-import nl.itvanced.ziokoban.GameCommands.GameCommand
+import nl.itvanced.ziokoban.model.GameCommands
+import nl.itvanced.ziokoban.model.GameCommands.GameCommand
 import zio.blocking.Blocking
 
 //=== Version of GameInput that takes input from JLine NonBlockingReader ===

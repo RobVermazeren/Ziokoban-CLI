@@ -12,7 +12,7 @@ object AnsiConsoleOutput {
   final case class LiveService(
     config: Config
   ) extends GameOutput.Service {
-    import nl.itvanced.ziokoban.GameState
+    import nl.itvanced.ziokoban.model.GameState
     import nl.itvanced.ziokoban.model.Coord
     import org.fusesource.jansi.{Ansi, AnsiConsole}
     import zio.Task
