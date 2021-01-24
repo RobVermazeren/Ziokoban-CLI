@@ -5,7 +5,7 @@ import nl.itvanced.ziokoban.model.LevelMap
 case class LevelCollection( 
   title: String,
   description: String,
-  levels: List[LevelSpec]
+  levels: Vector[LevelSpec]
 )
 
 case class LevelSpec(

@@ -26,7 +26,7 @@ object SlcSokobanLevels {
           LevelCollection(
             title = sls.title,
             description = sls.description,
-            levels = convertedLevels.flatMap(_.toOption)
+            levels = convertedLevels.flatMap(_.toOption).toVector
           )
         )
 
