@@ -14,6 +14,7 @@ object DefaultLevelCollectionController {
   val live: ZLayer[LevelCollectionProvider with GamePlayController with GameOutput, Throwable, LevelCollectionController] =
     ZLayer.fromEffect(newLiveService())
   
+  /** Create LevelCollectionController inside a ZIO. */  
   def newLiveService(): ZIO[LevelCollectionProvider with GamePlayController with GameOutput, Throwable, LevelCollectionController.Service] = {
     for {
       lc  <- LevelCollectionProvider.loadLevelCollection()
@@ -23,6 +24,13 @@ object DefaultLevelCollectionController {
     } yield LiveService(lc, gpc, go, st)
   }
 
+  /** Implementation of the Live service for LevelCollectionController.
+   *  @param levelCollection The level collection to be played.
+   *  @param gamePlayController Interface to GamePlayController service.
+   *  @param gameOutput Interface to GameOutput service.
+   *  @param sessionState Ref containing the session state.
+   *  @return Implementation of the LevelCollectionController service. 
+   */
   final case class LiveService(
     levelCollection: LevelCollection, 
     gamePlayController: GamePlayController.Service,

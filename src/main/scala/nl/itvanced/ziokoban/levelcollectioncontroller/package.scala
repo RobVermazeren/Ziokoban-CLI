@@ -10,7 +10,7 @@ package object levelcollectioncontroller {
   object LevelCollectionController {
 
     trait Service {
-      /** Play on single level */
+      /** Play the configured level collection */
       def playLevelCollection(): Task[Boolean] // RVNOTE: What is best return type here? 
    }
 
