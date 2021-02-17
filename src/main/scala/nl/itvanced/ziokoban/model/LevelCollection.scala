@@ -9,6 +9,8 @@ case class LevelCollection(
 )
 
 case class LevelSpec(
-  id: String,
+  id: LevelId,
   map: LevelMap
 )
+
+class LevelId(val value: String) extends AnyVal

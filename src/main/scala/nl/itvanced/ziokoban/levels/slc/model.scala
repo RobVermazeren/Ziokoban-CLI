@@ -1,9 +1,8 @@
 package nl.itvanced.ziokoban.levels.slc
 
-import nl.itvanced.ziokoban.model.{LevelCollection, LevelMap, PlayingLevel}
+import nl.itvanced.ziokoban.model._
 import scala.util.{Failure, Success, Try}
 import nl.itvanced.ziokoban.levels.format.AsciiLevelFormat
-import nl.itvanced.ziokoban.model.LevelSpec
 
 case class SlcSokobanLevels(
   title: String,
@@ -36,7 +35,7 @@ object SlcSokobanLevels {
     for {
       levelMap <- AsciiLevelFormat.toLevelMap(l.lines)
     } yield
-      LevelSpec(id = l.id, map = levelMap)
+      LevelSpec(id = new LevelId(l.id), map = levelMap)
 
 }
 
