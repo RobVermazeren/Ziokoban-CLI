@@ -1,7 +1,7 @@
 package nl.itvanced.ziokoban.gameplay
 
 import zio.{Task, ZIO, ZLayer}
-import nl.itvanced.ziokoban.model.{GameCommands, GameState, PlayingLevel}
+import nl.itvanced.ziokoban.model.{GameCommand, GameState, PlayingLevel}
 import nl.itvanced.ziokoban.gameinput.GameInput
 import nl.itvanced.ziokoban.gameoutput.GameOutput
 import nl.itvanced.ziokoban.model.Direction
@@ -16,36 +16,31 @@ object DefaultGamePlayController {
 
   def newLiveService(gameInput: GameInput.Service, gameOutput: GameOutput.Service): GamePlayController.Service = 
     new GamePlayController.Service {
-      import GameCommands._
+      import GameCommand._
 
       def playLevel(level: PlayingLevel): Task[PlayLevelResult] = {
         val gameState = GameState.startLevel(level)
         for {
-          _  <- gameOutput.preDrawing(gameState)
-          _  <- gameOutput.drawGameState(gameState)
-          gs <- gameLoop(gameState)
-          _  <- gameOutput.postDrawing(gs)
-          _  <- gs.isSolved match {
-            case Some(true) =>
-              gameOutput.println(s"\nYour steps were ${GameState.allStepsString(gs)}\n") // RVNOTE: Should be moved elsewhere.
-            case _ => Task.unit
-          }
+          _       <- gameOutput.preDrawing(gameState)
+          _       <- gameOutput.drawGameState(gameState)
+          (c, gs) <- gameLoop(gameState)
+          _       <- gameOutput.postDrawing(gs)
         } yield 
           gs.isSolved match {
-            case Some(true)  => PlayLevelResult.Solved
-            case Some(false) => PlayLevelResult.Failed
-            case None        => PlayLevelResult.Aborted 
+            case Some(true)  => PlayLevelResult.Solved(steps = GameState.allSteps(gs), 0) // RVNOTE: implement timing of attempt.
+            case _           => PlayLevelResult.NotSolved(command = c)
           }
       } 
 
       private def gameLoop(
         gs: GameState
-      ): Task[GameState] =
+      ): Task[(GameCommand, GameState)] =
         for {
-          c <- gameInput.nextCommand()
-          r <- processCommand(c.getOrElse(Noop), gs)
-          s <- if (r.isFinished) Task.succeed(r) else gameLoop(r)
-        } yield s
+          i            <- gameInput.nextCommand()
+          c = i.getOrElse(Noop)
+          newGameState <- processCommand(c, gs)
+          result       <- if (newGameState.isFinished) Task.succeed((c, newGameState)) else gameLoop(newGameState)
+        } yield result 
 
       private def processCommand(gc: GameCommand, gs: GameState): Task[GameState] =
         gc match {

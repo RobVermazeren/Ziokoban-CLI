@@ -6,13 +6,12 @@ import zio.duration.Duration
 import java.util.concurrent.TimeUnit
 import org.jline.utils.NonBlockingReader
 
-import nl.itvanced.ziokoban.model.GameCommands
-import nl.itvanced.ziokoban.model.GameCommands.GameCommand
+import nl.itvanced.ziokoban.model.GameCommand
 import zio.blocking.Blocking
 
 //=== Version of GameInput that takes input from JLine NonBlockingReader ===
 object JLineGameInput {
-  import GameCommands._
+  import GameCommand._
 
   val live: ZLayer[Clock, Throwable, GameInput] =
     ZLayer.fromEffect(
@@ -55,12 +54,12 @@ object JLineGameInput {
           .either // RVNOTE: bit too simplified error handling.
       gce <- UIO.succeed(e.flatMap { i =>
         i match {
-          case 'w' | 65 => Right(GameCommands.MoveUp)
-          case 'a' | 68 => Right(GameCommands.MoveLeft)
-          case 's' | 66 => Right(GameCommands.MoveDown)
-          case 'd' | 67 => Right(GameCommands.MoveRight)
-          case 120      => Right(GameCommands.Undo) //  x key
-          case 'q'      => Right(GameCommands.Quit)
+          case 'w' | 65 => Right(GameCommand.MoveUp)
+          case 'a' | 68 => Right(GameCommand.MoveLeft)
+          case 's' | 66 => Right(GameCommand.MoveDown)
+          case 'd' | 67 => Right(GameCommand.MoveRight)
+          case 120      => Right(GameCommand.Undo) //  x key
+          case 'q'      => Right(GameCommand.Quit)
           case _        => Left("Unused key")
         }
       })

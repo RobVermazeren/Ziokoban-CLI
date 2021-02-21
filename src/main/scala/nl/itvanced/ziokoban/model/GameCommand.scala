@@ -1,8 +1,7 @@
 package nl.itvanced.ziokoban.model
 
-object GameCommands {
-
-  sealed trait GameCommand extends Product with Serializable
+sealed trait GameCommand extends Product with Serializable
+object GameCommand {
 
   sealed trait MoveCommand    extends GameCommand
   final case object MoveUp    extends MoveCommand

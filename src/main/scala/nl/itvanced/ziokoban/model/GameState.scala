@@ -163,18 +163,18 @@ object GameState {
   /**
    * Return all game steps.
    *  @param gs the current game state.
-   *  @return a string containing all game steps from first to last.
+   *  @return all game steps from first to last.
    */
-  def allStepsString(gs: GameState): String = gs.history.map(_.appliedDirection).map(direction2char).mkString.reverse
+  def allSteps(gs: GameState): List[Direction] = gs.history.map(_.appliedDirection).reverse
 
-  /** Translate a Direction to a Char */
-  private def direction2char(d: Direction) =
-    d match {
-      case Down  => 'd'
-      case Left  => 'l'
-      case Right => 'r'
-      case Up    => 'u'
-    }
+  /** Translate a Direction to a Char */  // RVNOTE: needs to be moved (where needed)
+  // private def direction2char(d: Direction) =
+  //   d match {
+  //     case Down  => 'd'
+  //     case Left  => 'l'
+  //     case Right => 'r'
+  //     case Up    => 'u'
+  //   }
 
   /**
    * Return the Coord that results from moving from c into direction d and taking s steps.

@@ -38,30 +38,49 @@ object DefaultLevelCollectionController {
   ) extends LevelCollectionController.Service {
     // RVNOTE: For the moment only playing first level. Eventually: iterate over all non-solved levels.
 
-      def playLevelCollection(): Task[Boolean] = {
-        firstPlayingLevel(levelCollection) match { 
-          case None     => Task.succeed(false)
-          case Some(fl) => playLevel(fl)
-        }
-      }
 
-      private def playLevel(l: PlayingLevel): Task[Boolean] = {
-          for {
-            result <- gamePlayController.playLevel(l)
-            _      <- result match {
-              case PlayLevelResult.Solved  => gameOutput.println("Congratulations, you won!")
-              case PlayLevelResult.Failed  => gameOutput.println("Better luck next time")
-              case PlayLevelResult.Aborted => gameOutput.println("Don't give up!") // RVNOTE: Currently not possible
-            } 
-          } yield // {
-            true
-      }
+    // RVNOTE:
+    //  Need a ZIO/Task that will be repeated. ZIO.repeat(Schedule.w)
+    def playLevelCollectionNew(): Task[Boolean] = {
+      // PlayCurrentLevel.
+      // Update session state with result of level.  ## Question: what are the commands allowed?
+      //   - Won     => "currentLevel is solved", played++
+      //   - Lost    => played++
+      //   - Aborted => played++ (is same as lost, just that used left early)
+      // Ask user what to do next
+      //   - Quit: Stop game
+      //   - Replay last level: Play
+      //   - Replay next: 
+      //   - Replay next unsolved:
+      //
+      // Keep playing until quit.
+            ???
+    }
 
-      // RVNOTE: This is a temporary method so we can play the first level
-      private def firstPlayingLevel(lc: LevelCollection): Option[PlayingLevel] =
-        for {
-          levelSpec    <- lc.levels.headOption
-          playingLevel <- PlayingLevel.fromLevelMap(levelSpec.map).toOption
-        } yield playingLevel
+
+    def playLevelCollection(): Task[Boolean] = { // RVNOTE: To be removed.
+      firstPlayingLevel(levelCollection) match { 
+        case None     => Task.succeed(false)
+        case Some(fl) => playLevel(fl)
+      }
+    }
+
+    private def playLevel(l: PlayingLevel): Task[Boolean] = {
+      for {
+        result <- gamePlayController.playLevel(l)
+        _      <- result match {
+          case PlayLevelResult.Solved(s, t) => gameOutput.println("Congratulations, you won!")
+          case PlayLevelResult.NotSolved(c) => gameOutput.println("Better luck next time")
+        } 
+      } yield // {
+        true
+    }
+
+    // RVNOTE: This is a temporary method so we can play the first level
+    private def firstPlayingLevel(lc: LevelCollection): Option[PlayingLevel] =
+      for {
+        levelSpec    <- lc.levels.headOption
+        playingLevel <- PlayingLevel.fromLevelMap(levelSpec.map).toOption
+      } yield playingLevel
   } 
 }

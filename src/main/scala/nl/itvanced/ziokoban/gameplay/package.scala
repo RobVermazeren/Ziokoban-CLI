@@ -1,7 +1,7 @@
 package nl.itvanced.ziokoban
 
 import zio.{Has, Task, ZIO}
-import nl.itvanced.ziokoban.model.{LevelCollection, PlayingLevel}
+import nl.itvanced.ziokoban.model._
 
 package object gameplay {
 
@@ -9,9 +9,19 @@ package object gameplay {
 
   sealed trait PlayLevelResult
   object PlayLevelResult {
-    case object Solved  extends PlayLevelResult
-    case object Failed  extends PlayLevelResult
-    case object Aborted extends PlayLevelResult
+    /**
+      * Level has been solved.
+      *
+      * @param steps Steps that solved the level. 
+      * @param timeInSeconds Time taken (in seconds) to solve the level.
+      */
+    case class Solved(steps: List[Direction], timeInSeconds: Int)  extends PlayLevelResult
+    /**
+      * Level has not been solved. 
+      *
+      * @param command Command that aborted this attempt to solve level.
+      */
+    case class NotSolved(command: GameCommand)  extends PlayLevelResult
   }
 
   object GamePlayController {

@@ -1,7 +1,7 @@
 package nl.itvanced.ziokoban
 
 import zio.{Has, Task, ZIO}
-import nl.itvanced.ziokoban.model.GameCommands.GameCommand
+import nl.itvanced.ziokoban.model.GameCommand
 
 package object gameinput {
 
