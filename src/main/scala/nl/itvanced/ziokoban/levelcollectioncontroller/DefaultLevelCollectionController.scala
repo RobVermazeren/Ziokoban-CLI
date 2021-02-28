@@ -1,14 +1,14 @@
 package nl.itvanced.ziokoban.levelcollectioncontroller
 
-import zio.{Has, Task, ZIO, ZLayer}
+import zio.{Has, Ref, Task, ZIO, ZLayer}
 import nl.itvanced.ziokoban.levelcollectionprovider.LevelCollectionProvider
 import nl.itvanced.ziokoban.gameplay.GamePlayController
-import zio.Ref
-import nl.itvanced.ziokoban.model.{LevelCollection, PlayingLevel}
+import nl.itvanced.ziokoban.model.{GameCommand, LevelCollection, PlayingLevel}
 import nl.itvanced.ziokoban.gameplay.PlayLevelResult
 import nl.itvanced.ziokoban.gameoutput.GameOutput
 
 object DefaultLevelCollectionController {
+  import PlayLevelResult._
 
   val live: ZLayer[LevelCollectionProvider with GamePlayController with GameOutput, Throwable, LevelCollectionController] =
     ZLayer.fromEffect(newLiveService())
@@ -36,29 +36,56 @@ object DefaultLevelCollectionController {
     gameOutput: GameOutput.Service,
     sessionState: Ref[SessionState]
   ) extends LevelCollectionController.Service {
-    // RVNOTE: For the moment only playing first level. Eventually: iterate over all non-solved levels.
 
 
-    // RVNOTE:
-    //  Need a ZIO/Task that will be repeated. ZIO.repeat(Schedule.w)
-    def playLevelCollectionNew(): Task[Boolean] = {
-      // PlayCurrentLevel.
-      // Update session state with result of level.  ## Question: what are the commands allowed?
-      //   - Won     => "currentLevel is solved", played++
-      //   - Lost    => played++
-      //   - Aborted => played++ (is same as lost, just that used left early)
-      // Ask user what to do next
-      //   - Quit: Stop game
-      //   - Replay last level: Play
-      //   - Replay next: 
-      //   - Replay next unsolved:
-      //
-      // Keep playing until quit.
-            ???
+    // RVNOTE: Add scaladoc
+    def playLevelCollection(): Task[Boolean] = {
+      playCurrentLevel.repeatUntil {
+        case NotSolved(GameCommand.Quit) => true
+        case _                           => false
+      }.map {
+        _ => true // RVNOTE: Still need to decide best return type. Unit?
+      } 
     }
 
+    val playCurrentLevel: Task[PlayLevelResult] = {
+      for {
+        sessionState <- sessionState.get
+        currentLevel <- getLevelByIndex(levelCollection, sessionState.currentLevelIndex)
+        levelResult  <- gamePlayController.playLevel(currentLevel) 
+        _            <- updateSessionState(levelResult)
+      } yield levelResult  
+    }
 
-    def playLevelCollection(): Task[Boolean] = { // RVNOTE: To be removed.
+    def getLevelByIndex(lc: LevelCollection, index: Int): Task[PlayingLevel] = 
+      for {
+        levelSpec    <- Task.effect(lc.levels.apply(index)) // levels(i) may throw exception
+        playingLevel <- Task.fromTry(PlayingLevel.fromLevelMap(levelSpec.map))
+      } yield playingLevel
+
+    def updateSessionState(r: PlayLevelResult): Task[Unit] = 
+      r match {
+        case Solved(steps, _) => sessionState.update(ss => 
+          ss.markSolved().moveToNextUnsolvedLevel()
+        ) 
+
+        case NotSolved(command) => command match {
+          case GameCommand.Next => 
+            sessionState.update(_.moveToNextLevel())
+
+          case GameCommand.NextUnsolved => 
+            sessionState.update(_.moveToNextUnsolvedLevel())
+
+          case GameCommand.Previous =>
+            sessionState.update(_.moveToPreviousLevel())
+
+          case _                => 
+            Task.unit 
+        }
+      }
+
+
+    def playLevelCollectionOld(): Task[Boolean] = { // RVNOTE: To be removed.
       firstPlayingLevel(levelCollection) match { 
         case None     => Task.succeed(false)
         case Some(fl) => playLevel(fl)
@@ -70,7 +97,7 @@ object DefaultLevelCollectionController {
         result <- gamePlayController.playLevel(l)
         _      <- result match {
           case PlayLevelResult.Solved(s, t) => gameOutput.println("Congratulations, you won!")
-          case PlayLevelResult.NotSolved(c) => gameOutput.println("Better luck next time")
+          case PlayLevelResult.NotSolved(c) => gameOutput.println(s"Exit with $c. Better luck next time")
         } 
       } yield // {
         true

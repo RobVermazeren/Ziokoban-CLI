@@ -54,13 +54,17 @@ object JLineGameInput {
           .either // RVNOTE: bit too simplified error handling.
       gce <- UIO.succeed(e.flatMap { i =>
         i match {
-          case 'w' | 65 => Right(GameCommand.MoveUp)
-          case 'a' | 68 => Right(GameCommand.MoveLeft)
-          case 's' | 66 => Right(GameCommand.MoveDown)
-          case 'd' | 67 => Right(GameCommand.MoveRight)
-          case 120      => Right(GameCommand.Undo) //  x key
-          case 'q'      => Right(GameCommand.Quit)
-          case _        => Left("Unused key")
+          case 'w' | 65  => Right(GameCommand.MoveUp)
+          case 'a' | 68  => Right(GameCommand.MoveLeft)
+          case 's' | 66  => Right(GameCommand.MoveDown)
+          case 'd' | 67  => Right(GameCommand.MoveRight)
+          case 'x'       => Right(GameCommand.Undo) //  x key
+          case 'r'       => Right(GameCommand.Replay)
+          case 'n'       => Right(GameCommand.Next)
+          case 'u'       => Right(GameCommand.NextUnsolved) 
+          case 'p'       => Right(GameCommand.Previous) 
+          case 'q'       => Right(GameCommand.Quit)
+          case _         => Left("Unused key")
         }
       })
       _ <- gce match {

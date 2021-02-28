@@ -8,18 +8,41 @@ final case class SessionState private (
 ) {
   val numberOfLevels = solvedLevels.size
 
-  def updated(levelIndex: Int, solved: Boolean): SessionState = {
-    val newSolvedLevels = solvedLevels.updated(levelIndex, solved)
+  def markSolved(): SessionState = {
+    val newSolvedLevels = solvedLevels.updated(currentLevelIndex, true)
+    SessionState(currentLevelIndex, newSolvedLevels)
+  }
 
-    def firstAfter(i: Int): Option[Int] = (i until numberOfLevels).find(!solvedLevels(_)) 
-    def firstBefore(i: Int): Option[Int] = (0 until i).find(!solvedLevels(_)) 
+  def moveToNextUnsolvedLevel(): SessionState = {
+    def firstAfter(i: Int): Option[Int] = ((i+1) until numberOfLevels).find(!solvedLevels(_)) 
+    def firstBefore(i: Int): Option[Int] = (0 to i).find(!solvedLevels(_)) 
 
     val newCurrentLevelIndex =  
-      firstAfter(levelIndex)
-        .orElse(firstBefore(levelIndex))
+      firstAfter(currentLevelIndex)
+        .orElse(firstBefore(currentLevelIndex))
         .getOrElse(0)
-    
-    SessionState(newCurrentLevelIndex, newSolvedLevels)
+
+    SessionState(newCurrentLevelIndex, solvedLevels)
+  }
+
+  def moveToNextLevel(): SessionState = {
+    println(s"currentIndex: $currentLevelIndex")
+    val newCurrentLevelIndex = {
+      val n = currentLevelIndex + 1
+      if (n < numberOfLevels) n else 0
+    } 
+    println(s"newCurrentIndex: $newCurrentLevelIndex")
+
+    SessionState(newCurrentLevelIndex, solvedLevels)
+  }
+
+  def moveToPreviousLevel(): SessionState = {
+    val newCurrentLevelIndex = {
+      val n = currentLevelIndex - 1
+      if (n < 0) numberOfLevels - 1 else n
+    } 
+
+    SessionState(newCurrentLevelIndex, solvedLevels)
   }
 }
 

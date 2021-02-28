@@ -17,7 +17,11 @@ The current features/restrictions are:
 - Levels are read from a slc file, containing a set of sokobon levels. This file is not included.
   Example source of slc files is [this sokoban website](http://www.sourcecode.se/sokoban/levels)
 - Slc file to use is configured in `ziokoban.conf`.  
-- Currently only one level of the collection is played.
+- Switch to other level:
+  - N key: Next level
+  - U key: Next unsolved level 
+  - P key: Previous level 
+- After solving a level, the game will switch to the next unsolved level.  
 - Navigation using arrow keys and WASD keys.
 - Undo moves with X key.
 - Quit the game with the Q key.
