@@ -2,9 +2,8 @@ package nl.itvanced.ziokoban.levelcollectioncontroller
 
 import zio.{Has, Ref, Task, ZIO, ZLayer}
 import nl.itvanced.ziokoban.levelcollectionprovider.LevelCollectionProvider
-import nl.itvanced.ziokoban.gameplay.GamePlayController
-import nl.itvanced.ziokoban.model.{GameCommand, LevelCollection, PlayingLevel}
-import nl.itvanced.ziokoban.gameplay.PlayLevelResult
+import nl.itvanced.ziokoban.gameplay._
+import nl.itvanced.ziokoban.model._
 import nl.itvanced.ziokoban.gameoutput.GameOutput
 
 object DefaultLevelCollectionController {
@@ -38,7 +37,7 @@ object DefaultLevelCollectionController {
   ) extends LevelCollectionController.Service {
 
 
-    // RVNOTE: Add scaladoc
+    /** Play the level collection. */
     def playLevelCollection(): Task[Boolean] = {
       playCurrentLevel.repeatUntil {
         case NotSolved(GameCommand.Quit) => true
@@ -48,6 +47,9 @@ object DefaultLevelCollectionController {
       } 
     }
 
+    /** Play the current level (in session state) and
+     *  update the session state based on the result. 
+     */
     val playCurrentLevel: Task[PlayLevelResult] = {
       for {
         sessionState <- sessionState.get
@@ -57,12 +59,21 @@ object DefaultLevelCollectionController {
       } yield levelResult  
     }
 
+    /** Return the level from a `LevelCollection` by index.
+     *  @param lc A `LevelCollection`
+     *  @param index Index identifying the desired level from this collection.
+     *  @return the level at the index-th location in this collection.
+     */
     def getLevelByIndex(lc: LevelCollection, index: Int): Task[PlayingLevel] = 
       for {
         levelSpec    <- Task.effect(lc.levels.apply(index)) // levels(i) may throw exception
         playingLevel <- Task.fromTry(PlayingLevel.fromLevelMap(levelSpec.map))
       } yield playingLevel
 
+      /** Update the current `SessionState` based on a `PlayLevelResult`.
+        * @param r The result of playing the current level.
+        * @return Updated `SessionState`
+        */
     def updateSessionState(r: PlayLevelResult): Task[Unit] = 
       r match {
         case Solved(steps, _) => sessionState.update(ss => 
@@ -83,31 +94,5 @@ object DefaultLevelCollectionController {
             Task.unit 
         }
       }
-
-
-    def playLevelCollectionOld(): Task[Boolean] = { // RVNOTE: To be removed.
-      firstPlayingLevel(levelCollection) match { 
-        case None     => Task.succeed(false)
-        case Some(fl) => playLevel(fl)
-      }
     }
-
-    private def playLevel(l: PlayingLevel): Task[Boolean] = {
-      for {
-        result <- gamePlayController.playLevel(l)
-        _      <- result match {
-          case PlayLevelResult.Solved(s, t) => gameOutput.println("Congratulations, you won!")
-          case PlayLevelResult.NotSolved(c) => gameOutput.println(s"Exit with $c. Better luck next time")
-        } 
-      } yield // {
-        true
-    }
-
-    // RVNOTE: This is a temporary method so we can play the first level
-    private def firstPlayingLevel(lc: LevelCollection): Option[PlayingLevel] =
-      for {
-        levelSpec    <- lc.levels.headOption
-        playingLevel <- PlayingLevel.fromLevelMap(levelSpec.map).toOption
-      } yield playingLevel
-  } 
 }

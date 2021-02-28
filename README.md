@@ -22,6 +22,7 @@ The current features/restrictions are:
   - U key: Next unsolved level 
   - P key: Previous level 
 - After solving a level, the game will switch to the next unsolved level.  
+- Currently results are not persisted, so every time the game is started all levels need to be played.
 - Navigation using arrow keys and WASD keys.
 - Undo moves with X key.
 - Quit the game with the Q key.
