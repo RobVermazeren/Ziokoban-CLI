@@ -2,6 +2,7 @@ package nl.itvanced.ziokoban
 
 import zio.{App, UIO, ZEnv}
 import zio.ExitCode
+import nl.itvanced.ziokoban.sessionstateaccess.SessionStateAccess
 
 object ZiokobanApp extends App {
   import zio.console.putStrLn
@@ -10,6 +11,7 @@ object ZiokobanApp extends App {
   import nl.itvanced.ziokoban.gameplay._
   import nl.itvanced.ziokoban.levelcollectioncontroller._
   import nl.itvanced.ziokoban.levelcollectionprovider._
+  import nl.itvanced.ziokoban.sessionstateaccess._
   import nl.itvanced.ziokoban.config.GameConfig
   import nl.itvanced.ziokoban.gameoutput.ansiconsole.AnsiConsoleOutput
   import zio.ZIO
@@ -36,7 +38,8 @@ object ZiokobanApp extends App {
     val gameOutputL                = configL.narrow(_.gameOutput) >>> AnsiConsoleOutput.live
     val gamePlayControllerL        = (gameInputL ++ gameOutputL) >>>  DefaultGamePlayController.live
     val levelsProviderL            = configL.narrow(_.levels) >>> FilesystemLevelCollectionProvider.live
-    val levelCollectionControllerL = (levelsProviderL ++ gamePlayControllerL ++ gameOutputL) >>> DefaultLevelCollectionController.live
+    val sessionStateAccessL        = levelsProviderL >>> DefaultSessionStateAccess.live
+    val levelCollectionControllerL = (sessionStateAccessL ++ gamePlayControllerL ++ gameOutputL) >>> DefaultLevelCollectionController.live
 
     val layers = gameOutputL ++ levelCollectionControllerL
 

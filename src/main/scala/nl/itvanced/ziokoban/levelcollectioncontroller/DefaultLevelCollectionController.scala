@@ -5,35 +5,33 @@ import nl.itvanced.ziokoban.levelcollectionprovider.LevelCollectionProvider
 import nl.itvanced.ziokoban.gameplay._
 import nl.itvanced.ziokoban.model._
 import nl.itvanced.ziokoban.gameoutput.GameOutput
+import nl.itvanced.ziokoban.sessionstateaccess.SessionStateAccess
 
 object DefaultLevelCollectionController {
   import PlayLevelResult._
 
-  val live: ZLayer[LevelCollectionProvider with GamePlayController with GameOutput, Throwable, LevelCollectionController] =
+  val live: ZLayer[SessionStateAccess with GamePlayController with GameOutput, Throwable, LevelCollectionController] =
     ZLayer.fromEffect(newLiveService())
   
   /** Create LevelCollectionController inside a ZIO. */  
-  def newLiveService(): ZIO[LevelCollectionProvider with GamePlayController with GameOutput, Throwable, LevelCollectionController.Service] = {
+  def newLiveService(): ZIO[SessionStateAccess with GamePlayController with GameOutput, Throwable, LevelCollectionController.Service] = {
     for {
-      lc  <- LevelCollectionProvider.loadLevelCollection()
+      ssa <- ZIO.service[SessionStateAccess.Service]
       gpc <- ZIO.service[GamePlayController.Service]
       go  <- ZIO.service[GameOutput.Service]
-      st  <- Ref.make(SessionState.initial(lc)) // Ref for storing session state.
-    } yield LiveService(lc, gpc, go, st)
+    } yield LiveService(ssa, gpc, go)
   }
 
   /** Implementation of the Live service for LevelCollectionController.
-   *  @param levelCollection The level collection to be played.
+   *  @param sessionStateAcces Interface to SessionStateAccess service.
    *  @param gamePlayController Interface to GamePlayController service.
    *  @param gameOutput Interface to GameOutput service.
-   *  @param sessionState Ref containing the session state.
    *  @return Implementation of the LevelCollectionController service. 
    */
   final case class LiveService(
-    levelCollection: LevelCollection, 
+    sessionStateAccess: SessionStateAccess.Service, 
     gamePlayController: GamePlayController.Service,
     gameOutput: GameOutput.Service,
-    sessionState: Ref[SessionState]
   ) extends LevelCollectionController.Service {
 
 
@@ -52,45 +50,35 @@ object DefaultLevelCollectionController {
      */
     val playCurrentLevel: Task[PlayLevelResult] = {
       for {
-        sessionState <- sessionState.get
-        currentLevel <- getLevelByIndex(levelCollection, sessionState.currentLevelIndex)
+        currentLevel <- sessionStateAccess.getCurrentLevel()
         levelResult  <- gamePlayController.playLevel(currentLevel) 
         _            <- updateSessionState(levelResult)
       } yield levelResult  
     }
 
-    /** Return the level from a `LevelCollection` by index.
-     *  @param lc A `LevelCollection`
-     *  @param index Index identifying the desired level from this collection.
-     *  @return the level at the index-th location in this collection.
-     */
-    def getLevelByIndex(lc: LevelCollection, index: Int): Task[PlayingLevel] = 
-      for {
-        levelSpec    <- Task.effect(lc.levels.apply(index)) // levels(i) may throw exception
-        playingLevel <- Task.fromTry(PlayingLevel.fromLevelMap(levelSpec.map))
-      } yield playingLevel
-
-      /** Update the current `SessionState` based on a `PlayLevelResult`.
-        * @param r The result of playing the current level.
-        * @return Updated `SessionState`
-        */
+    /** Update the current `SessionState` based on a `PlayLevelResult`.
+      * @param r The result of playing the current level.
+      * @return Updated `SessionState`
+      */
     def updateSessionState(r: PlayLevelResult): Task[Unit] = 
       r match {
-        case Solved(steps, _) => sessionState.update(ss => 
-          ss.markSolved().moveToNextUnsolvedLevel()
-        ) 
+        case Solved(steps, _) => 
+          for {
+            _ <- sessionStateAccess.markSolved()
+            _ <- sessionStateAccess.moveToNextUnsolvedLevel()
+          } yield ()  
 
         case NotSolved(command) => command match {
           case GameCommand.Next => 
-            sessionState.update(_.moveToNextLevel())
+            sessionStateAccess.moveToNextLevel().unit
 
           case GameCommand.NextUnsolved => 
-            sessionState.update(_.moveToNextUnsolvedLevel())
+            sessionStateAccess.moveToNextUnsolvedLevel().unit
 
           case GameCommand.Previous =>
-            sessionState.update(_.moveToPreviousLevel())
+            sessionStateAccess.moveToPreviousLevel().unit
 
-          case _                => 
+          case _ => 
             Task.unit 
         }
       }
