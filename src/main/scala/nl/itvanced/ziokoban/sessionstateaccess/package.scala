@@ -11,7 +11,7 @@ package object sessionstateaccess {
   object SessionStateAccess {
 
     trait Service {
-      /** Return the configured level collection. */
+      /** Return the current level from the configured level collection. */
       def getCurrentLevel(): Task[PlayingLevel] 
       /** Mark current level solved. */
       def markSolved(): Task[Unit]

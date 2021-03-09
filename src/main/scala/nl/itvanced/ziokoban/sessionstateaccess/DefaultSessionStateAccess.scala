@@ -28,7 +28,7 @@ object DefaultSessionStateAccess {
     levelCollection: LevelCollection, 
     sessionState: Ref[SessionState]
   ) extends SessionStateAccess.Service {
-      /** Return the configured level collection. */
+      /** Return the current level from the  configured level collection. */
       def getCurrentLevel(): Task[PlayingLevel] = 
         for {
           state        <- sessionState.get
