@@ -31,6 +31,7 @@ javacOptions ++= Seq("-Xlint:unchecked", "-Xlint:deprecation", "-source", "1.8",
 val CatsVersion = "2.0.0"
 val ZIOVersion  = "1.0.1"
 val ZIOConfigVersion  = "1.0.0-RC26"
+val CirceVersion = "0.12.3"
 
 libraryDependencies ++= Seq(
   // ZIO
@@ -42,6 +43,10 @@ libraryDependencies ++= Seq(
   "org.typelevel" %% "cats-core" % CatsVersion,
   // XML reading
   "org.scala-lang.modules" %% "scala-xml" % "1.2.0",
+  // JSON support
+  "io.circe" %% "circe-core" % CirceVersion,
+  "io.circe" %% "circe-generic" % CirceVersion,
+  "io.circe" %% "circe-parser" % CirceVersion,
   // Console handling
   "org.fusesource.jansi" % "jansi" % "1.17.1", // "1.18",
   "org.jline"            % "jline" % "3.10.0", //  "3.16.0",

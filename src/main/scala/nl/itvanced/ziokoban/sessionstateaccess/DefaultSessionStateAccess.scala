@@ -1,32 +1,49 @@
 package nl.itvanced.ziokoban.sessionstateaccess
 
-import zio.{Has, Ref, Task, ZIO, ZLayer}
+import zio.{Has, Queue, Ref, Schedule, Task, UIO, ZIO, ZLayer}
 import nl.itvanced.ziokoban.levelcollectionprovider.LevelCollectionProvider
-import nl.itvanced.ziokoban.levelcollectioncontroller.SessionState
 import nl.itvanced.ziokoban.model.LevelCollection
 import nl.itvanced.ziokoban.model.PlayingLevel
+import zio.clock.Clock
 
 object DefaultSessionStateAccess {
   
-  val live: ZLayer[LevelCollectionProvider, Throwable, SessionStateAccess] =
+  val live: ZLayer[LevelCollectionProvider with Clock, Throwable, SessionStateAccess] =
     ZLayer.fromEffect(newLiveService())
 
   /** Create SessionStateAccess inside a ZIO. */  
-  def newLiveService(): ZIO[LevelCollectionProvider, Throwable, SessionStateAccess.Service] = {
+  def newLiveService(): ZIO[LevelCollectionProvider with Clock, Throwable, SessionStateAccess.Service] = {
     for {
       lc  <- LevelCollectionProvider.loadLevelCollection()
+      sp  <- LevelCollectionProvider.levelCollectionStatsPath()
       st  <- Ref.make(SessionState.initial(lc)) // Ref for storing session state.
-    } yield LiveService(lc, st)
+      tq  <- Queue.sliding[SessionState](1) // Trigger queue for persisting session state.
+      _   <- persistSessionState(tq, sp).repeat(Schedule.forever).forkDaemon
+    } yield new LiveService(lc, st, tq)
   }
+
+  /* 
+     Process reads queue in separate fiber (and will thus be suspended until non empty), read the state and will safe to file.
+  */
+  private def persistSessionState(tq: Queue[SessionState], sp: Option[os.Path]): UIO[Unit] = 
+    sp.fold(ZIO.unit)(path =>
+      for {
+        ssf <- tq.take.fork // Wait for value in queue in separate fiber.
+        ss  <- ssf.join 
+        _   <- SessionStateStorage.writeToFile(path, ss).ignore
+      } yield ()
+    )
 
   /** Implementation of the Live service for SessionStateAccess.
    *  @param levelCollection The level collection to be played.
    *  @param sessionState Ref containing the session state.
+   *  @param triggerQueue Queue for triggering persisting of the current session state.
    *  @return Implementation of the SessionStateAccess service. 
    */
-  final case class LiveService(
+  final class LiveService(
     levelCollection: LevelCollection, 
-    sessionState: Ref[SessionState]
+    sessionState: Ref[SessionState],
+    triggerQueue: Queue[SessionState],
   ) extends SessionStateAccess.Service {
       /** Return the current level from the  configured level collection. */
       def getCurrentLevel(): Task[PlayingLevel] = 
@@ -38,18 +55,30 @@ object DefaultSessionStateAccess {
 
       /** Mark current level solved. */
       def markSolved(): Task[Unit] = 
-        sessionState.update(_.markSolved())
+        for {
+          ss <- sessionState.updateAndGet(_.markSolved())
+          _  <- triggerQueue.offer(ss)
+        } yield ()
 
       /** Move to next level. */
       def moveToNextLevel(): Task[Int] = 
-        sessionState.updateAndGet(_.moveToNextLevel()).map(_.currentLevelIndex)
+        for {
+          ss <- sessionState.updateAndGet(_.moveToNextLevel())
+          _  <- triggerQueue.offer(ss)
+        } yield ss.currentLevelIndex
 
       /** Move to next unsolved level. */
       def moveToNextUnsolvedLevel(): Task[Int] = 
-        sessionState.updateAndGet(_.moveToNextUnsolvedLevel()).map(_.currentLevelIndex)
+        for {
+          ss <- sessionState.updateAndGet(_.moveToNextUnsolvedLevel())
+          _  <- triggerQueue.offer(ss)
+        } yield ss.currentLevelIndex
 
       /** Move to previous level. */
       def moveToPreviousLevel(): Task[Int] = 
-        sessionState.updateAndGet(_.moveToPreviousLevel()).map(_.currentLevelIndex)
+        for {
+          ss <- sessionState.updateAndGet(_.moveToPreviousLevel())
+          _  <- triggerQueue.offer(ss)
+        } yield ss.currentLevelIndex
   }
 }

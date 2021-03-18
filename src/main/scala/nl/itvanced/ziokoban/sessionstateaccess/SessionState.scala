@@ -1,30 +1,36 @@
-package nl.itvanced.ziokoban.levelcollectioncontroller
+package nl.itvanced.ziokoban.sessionstateaccess
 
 import nl.itvanced.ziokoban.model.LevelCollection
+import nl.itvanced.ziokoban.model.LevelId
 
-final case class SessionState private (
+final case class LevelState(id: LevelId, solved: Boolean) {
+  def asSolved: LevelState = this.copy(solved = true)
+}
+
+final case class SessionState(
   currentLevelIndex: Int,
-  solvedLevels: Vector[Boolean]
+  levels: Vector[LevelState]
 ) {
-  val numberOfLevels = solvedLevels.size
+  val numberOfLevels = levels.size
 
   /** Return updated `SessionState` where current level is marked as solved. */
   def markSolved(): SessionState = {
-    val newSolvedLevels = solvedLevels.updated(currentLevelIndex, true)
+    val currentLevelState = levels(currentLevelIndex)
+    val newSolvedLevels = levels.updated(currentLevelIndex, currentLevelState.asSolved)
     SessionState(currentLevelIndex, newSolvedLevels)
   }
 
   /** Return update `SessionState` where current level is moved to next unsolved level. */
   def moveToNextUnsolvedLevel(): SessionState = {
-    def firstAfter(i: Int): Option[Int] = ((i+1) until numberOfLevels).find(!solvedLevels(_)) 
-    def firstBefore(i: Int): Option[Int] = (0 to i).find(!solvedLevels(_)) 
+    def firstAfter(i: Int): Option[Int] = ((i+1) until numberOfLevels).find(!levels(_).solved) 
+    def firstBefore(i: Int): Option[Int] = (0 to i).find(!levels(_).solved) 
 
     val newCurrentLevelIndex =  
       firstAfter(currentLevelIndex)
         .orElse(firstBefore(currentLevelIndex))
         .getOrElse(0)
 
-    SessionState(newCurrentLevelIndex, solvedLevels)
+    SessionState(newCurrentLevelIndex, levels)
   }
 
   /** Return update `SessionState` where current level is moved to next level. */
@@ -36,7 +42,7 @@ final case class SessionState private (
     } 
     println(s"newCurrentIndex: $newCurrentLevelIndex")
 
-    SessionState(newCurrentLevelIndex, solvedLevels)
+    SessionState(newCurrentLevelIndex, levels)
   }
 
   /** Return update `SessionState` where current level is moved to previous level. */
@@ -46,14 +52,14 @@ final case class SessionState private (
       if (n < 0) numberOfLevels - 1 else n
     } 
 
-    SessionState(newCurrentLevelIndex, solvedLevels)
+    SessionState(newCurrentLevelIndex, levels)
   }
 }
 
 object SessionState {
   def initial(lc: LevelCollection): SessionState = {
     val cl = 0
-    val sl = lc.levels.map(_ => false)
+    val sl = lc.levels.map(level => LevelState(id = level.id, solved = false))
     SessionState(cl, sl)
   }
 }
