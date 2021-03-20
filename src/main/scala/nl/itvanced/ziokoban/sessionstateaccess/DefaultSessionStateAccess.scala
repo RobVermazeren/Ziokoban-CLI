@@ -16,7 +16,8 @@ object DefaultSessionStateAccess {
     for {
       lc  <- LevelCollectionProvider.loadLevelCollection()
       sp  <- LevelCollectionProvider.levelCollectionStatsPath()
-      st  <- Ref.make(SessionState.initial(lc)) // Ref for storing session state.
+      ss  <- initialSessionState(sp, lc)
+      st  <- Ref.make(ss) // Ref for storing session state.
       tq  <- Queue.sliding[SessionState](1) // Trigger queue for persisting session state.
       _   <- persistSessionState(tq, sp).repeat(Schedule.forever).forkDaemon
     } yield new LiveService(lc, st, tq)
@@ -33,6 +34,14 @@ object DefaultSessionStateAccess {
         _   <- SessionStateStorage.writeToFile(path, ss).ignore
       } yield ()
     )
+
+  /*
+    Load session state from file. Initial state for level collection if no file exists.
+   */
+  private def initialSessionState(sp: Option[os.Path], lc: LevelCollection): Task[SessionState] = 
+    sp.fold[Task[SessionState]](Task.succeed(SessionState.initial(lc)))(path => 
+      SessionStateStorage.readFromFile(path)
+    )  
 
   /** Implementation of the Live service for SessionStateAccess.
    *  @param levelCollection The level collection to be played.
