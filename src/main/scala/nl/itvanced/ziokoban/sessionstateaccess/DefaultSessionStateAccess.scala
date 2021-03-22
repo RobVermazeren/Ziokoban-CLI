@@ -39,9 +39,12 @@ object DefaultSessionStateAccess {
     Load session state from file. Initial state for level collection if no file exists.
    */
   private def initialSessionState(sp: Option[os.Path], lc: LevelCollection): Task[SessionState] = 
-    sp.fold[Task[SessionState]](Task.succeed(SessionState.initial(lc)))(path => 
-      SessionStateStorage.readFromFile(path)
+    sp.fold[Task[SessionState]](newSessionStateForLevelCollection(lc))(path => 
+      SessionStateStorage.readFromFile(path).orElse(newSessionStateForLevelCollection(lc))
     )  
+
+  private def newSessionStateForLevelCollection(lc: LevelCollection): Task[SessionState] =
+    Task.succeed(SessionState.initial(lc))  
 
   /** Implementation of the Live service for SessionStateAccess.
    *  @param levelCollection The level collection to be played.
