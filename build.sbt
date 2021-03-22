@@ -9,10 +9,11 @@ Global / scalaVersion := "2.13.3"
 ThisBuild / scalaVersion := "2.13.3" 
 
 organization := "nl.itvanced"
+maintainer := "rob.vermazeren@itvanced.nl"
 
 addCompilerPlugin("org.typelevel" %% "kind-projector" % "0.11.0" cross CrossVersion.full)
 
-enablePlugins(JavaAppPackaging)
+enablePlugins(JavaAppPackaging, UniversalPlugin)
 
 scalacOptions ++= Seq(
   "-deprecation"
