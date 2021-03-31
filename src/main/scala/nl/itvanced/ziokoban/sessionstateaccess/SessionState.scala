@@ -2,9 +2,13 @@ package nl.itvanced.ziokoban.sessionstateaccess
 
 import nl.itvanced.ziokoban.model.LevelCollection
 import nl.itvanced.ziokoban.model.LevelId
+import nl.itvanced.ziokoban.model.GameMove
 
-final case class LevelState(id: LevelId, solved: Boolean) {
-  def asSolved: LevelState = this.copy(solved = true)
+final case class LevelState(id: LevelId, solved: Boolean, solutionString: Option[String]) {
+  def asSolved(solution: String): LevelState = {
+    val bestSolution = solutionString.fold(solution)(current => if (solution.size < current.size) solution else current)
+    this.copy(solved = true, solutionString = Some(bestSolution))
+  }
 }
 
 final case class SessionState(
@@ -14,9 +18,9 @@ final case class SessionState(
   val numberOfLevels = levels.size
 
   /** Return updated `SessionState` where current level is marked as solved. */
-  def markSolved(): SessionState = {
+  def markSolved(steps: List[GameMove]): SessionState = {
     val currentLevelState = levels(currentLevelIndex)
-    val newSolvedLevels = levels.updated(currentLevelIndex, currentLevelState.asSolved)
+    val newSolvedLevels = levels.updated(currentLevelIndex, currentLevelState.asSolved(SolutionString.fromGameMoves(steps)))
     SessionState(currentLevelIndex, newSolvedLevels)
   }
 
@@ -59,7 +63,7 @@ final case class SessionState(
 object SessionState {
   def initial(lc: LevelCollection): SessionState = {
     val cl = 0
-    val sl = lc.levels.map(level => LevelState(id = level.id, solved = false))
+    val sl = lc.levels.map(level => LevelState(id = level.id, solved = false, solutionString = None))
     SessionState(cl, sl)
   }
 }

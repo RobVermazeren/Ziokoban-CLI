@@ -3,7 +3,8 @@ package nl.itvanced.ziokoban.model
 import nl.itvanced.ziokoban.model.Direction._
 import scala.annotation.tailrec
 
-case class GameStep(pusherLocation: Coord, crateLocations: Set[Coord], appliedDirection: Direction)
+case class GameMove(direction: Direction, isPush: Boolean)
+case class GameStep(pusherLocation: Coord, crateLocations: Set[Coord], appliedMove: GameMove)
 
 /** Trait representing the state of a Sokoban game */
 trait GameState {
@@ -69,7 +70,7 @@ object GameState {
 
   /**
    * Apply a push to game state gs.
-   * Pusher pushes agains 0 or more crates.
+   * Pusher pushes against 0 or more crates.
    *
    * @param gs                     Current game state.
    * @param newPusherLocation      New location of the pusher.
@@ -78,8 +79,9 @@ object GameState {
    * @return                       Updatde game state.
    */
   def applyPush(gs: GameState, newPusherLocation: Coord, emptyLocationToPushTo: Coord, d: Direction): GameState = {
+    val isPush = newPusherLocation != emptyLocationToPushTo
     val newCrateLocations =
-      if (newPusherLocation != emptyLocationToPushTo)
+      if (isPush)
         gs.crates - newPusherLocation + emptyLocationToPushTo
       else gs.crates
     val newIsSolved = if (newCrateLocations == gs.level.targets) Some(true) else None
@@ -89,7 +91,7 @@ object GameState {
       val pusher   = newPusherLocation
       val crates   = newCrateLocations
       val isSolved = newIsSolved
-      val history  = GameStep(gs.pusher, gs.crates, d) :: gs.history
+      val history  = GameStep(gs.pusher, gs.crates, GameMove(d, isPush)) :: gs.history
     }
   }
 
@@ -105,7 +107,7 @@ object GameState {
     def hasCrate(c: Coord): Boolean        = gs.crates.contains(c)
     def isEmpty(c: Coord): Boolean         = isValidLocation(c) && !hasCrate(c)
 
-    val MaxPushableCrates = 1 // RVNATE: Move this somewhere else?
+    val MaxPushableCrates = 1 // RVNOTE: Move this somewhere else?
     val newPusherLocation = applyDirection(gs.pusher, d)
 
     searchEmptyTile(gs.crates, gs.emptyTiles, d)(gs.pusher, MaxPushableCrates) match {
@@ -165,16 +167,7 @@ object GameState {
    *  @param gs the current game state.
    *  @return all game steps from first to last.
    */
-  def allSteps(gs: GameState): List[Direction] = gs.history.map(_.appliedDirection).reverse
-
-  /** Translate a Direction to a Char */  // RVNOTE: needs to be moved (where needed)
-  // private def direction2char(d: Direction) =
-  //   d match {
-  //     case Down  => 'd'
-  //     case Left  => 'l'
-  //     case Right => 'r'
-  //     case Up    => 'u'
-  //   }
+  def allSteps(gs: GameState): List[GameMove] = gs.history.map(_.appliedMove).reverse
 
   /**
    * Return the Coord that results from moving from c into direction d and taking s steps.

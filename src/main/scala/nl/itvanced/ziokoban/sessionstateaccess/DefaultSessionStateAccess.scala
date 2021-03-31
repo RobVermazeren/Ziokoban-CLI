@@ -2,8 +2,7 @@ package nl.itvanced.ziokoban.sessionstateaccess
 
 import zio.{Has, Queue, Ref, Schedule, Task, UIO, ZIO, ZLayer}
 import nl.itvanced.ziokoban.levelcollectionprovider.LevelCollectionProvider
-import nl.itvanced.ziokoban.model.LevelCollection
-import nl.itvanced.ziokoban.model.PlayingLevel
+import nl.itvanced.ziokoban.model._
 import zio.clock.Clock
 
 object DefaultSessionStateAccess {
@@ -66,9 +65,9 @@ object DefaultSessionStateAccess {
         } yield playingLevel
 
       /** Mark current level solved. */
-      def markSolved(): Task[Unit] = 
+      def markSolved(steps: List[GameMove]): Task[Unit] = 
         for {
-          ss <- sessionState.updateAndGet(_.markSolved())
+          ss <- sessionState.updateAndGet(_.markSolved(steps))
           _  <- triggerQueue.offer(ss)
         } yield ()
 

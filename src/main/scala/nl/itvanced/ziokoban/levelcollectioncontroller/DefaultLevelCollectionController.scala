@@ -64,7 +64,7 @@ object DefaultLevelCollectionController {
       r match {
         case Solved(steps, _) => 
           for {
-            _ <- sessionStateAccess.markSolved()
+            _ <- sessionStateAccess.markSolved(steps)
             _ <- sessionStateAccess.moveToNextUnsolvedLevel()
           } yield ()  
 

@@ -15,7 +15,7 @@ package object gameplay {
       * @param steps Steps that solved the level. 
       * @param timeInSeconds Time taken (in seconds) to solve the level.
       */
-    case class Solved(steps: List[Direction], timeInSeconds: Int)  extends PlayLevelResult
+    case class Solved(steps: List[GameMove], timeInSeconds: Int)  extends PlayLevelResult
     /**
       * Level has not been solved. 
       *
