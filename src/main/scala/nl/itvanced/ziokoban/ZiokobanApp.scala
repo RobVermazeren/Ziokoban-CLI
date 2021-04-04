@@ -40,7 +40,7 @@ object ZiokobanApp extends App {
     val gamePlayControllerL        = (gameInputL ++ gameOutputL) >>>  DefaultGamePlayController.live
     val levelsProviderL            = configL.narrow(_.levels) >>> FilesystemLevelCollectionProvider.live
     val sessionStateAccessL        = (Clock.live ++ levelsProviderL) >>> DefaultSessionStateAccess.live
-    val levelCollectionControllerL = (sessionStateAccessL ++ gamePlayControllerL ++ gameOutputL) >>> DefaultLevelCollectionController.live
+    val levelCollectionControllerL = (sessionStateAccessL ++ gamePlayControllerL) >>> DefaultLevelCollectionController.live
 
     val layers = gameOutputL ++ levelCollectionControllerL
 

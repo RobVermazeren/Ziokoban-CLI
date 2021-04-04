@@ -4,34 +4,30 @@ import zio.{Has, Ref, Task, ZIO, ZLayer}
 import nl.itvanced.ziokoban.levelcollectionprovider.LevelCollectionProvider
 import nl.itvanced.ziokoban.gameplay._
 import nl.itvanced.ziokoban.model._
-import nl.itvanced.ziokoban.gameoutput.GameOutput
 import nl.itvanced.ziokoban.sessionstateaccess.SessionStateAccess
 
 object DefaultLevelCollectionController {
   import PlayLevelResult._
 
-  val live: ZLayer[SessionStateAccess with GamePlayController with GameOutput, Throwable, LevelCollectionController] =
+  val live: ZLayer[SessionStateAccess with GamePlayController, Throwable, LevelCollectionController] =
     ZLayer.fromEffect(newLiveService())
   
   /** Create LevelCollectionController inside a ZIO. */  
-  def newLiveService(): ZIO[SessionStateAccess with GamePlayController with GameOutput, Throwable, LevelCollectionController.Service] = {
+  def newLiveService(): ZIO[SessionStateAccess with GamePlayController, Throwable, LevelCollectionController.Service] = {
     for {
       ssa <- ZIO.service[SessionStateAccess.Service]
       gpc <- ZIO.service[GamePlayController.Service]
-      go  <- ZIO.service[GameOutput.Service]
-    } yield LiveService(ssa, gpc, go)
+    } yield LiveService(ssa, gpc)
   }
 
   /** Implementation of the Live service for LevelCollectionController.
    *  @param sessionStateAcces Interface to SessionStateAccess service.
    *  @param gamePlayController Interface to GamePlayController service.
-   *  @param gameOutput Interface to GameOutput service.
    *  @return Implementation of the LevelCollectionController service. 
    */
   final case class LiveService(
     sessionStateAccess: SessionStateAccess.Service, 
     gamePlayController: GamePlayController.Service,
-    gameOutput: GameOutput.Service,
   ) extends LevelCollectionController.Service {
 
 
